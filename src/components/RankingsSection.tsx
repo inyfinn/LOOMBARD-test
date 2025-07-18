@@ -21,17 +21,47 @@ export function RankingsSection(){
   const ratesRef = useRef(rates);
   const lastComputeTs = useRef<number>(0);
   const [groupedData, setGroupedData] = useState<{ [k: string]: RankingItem[] }>({ gains: [], losses: [] });
+  const computeTimeoutRef = useRef<NodeJS.Timeout>();
 
-  useEffect(()=>{ ratesRef.current = rates; },[rates]);
+  useEffect(()=>{
+    ratesRef.current = rates;
+  },[rates]);
 
   useEffect(() => {
     // compute immediately
     compute();
-    // schedule daily recompute
-    const daily = setInterval(compute, 86400000);
-    return () => clearInterval(daily);
+    // schedule recompute every 10 seconds for test mode, daily for live mode
+    const interval = setInterval(compute, isLiveMode ? 86400000 : 10000);
+    return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isLiveMode]);
+
+  // Dodatkowy useEffect dla test mode - reaguje na zmiany rates10sAgo
+  useEffect(() => {
+    if (!isLiveMode && Object.keys(rates10sAgo).length > 0) {
+      // Debounce compute calls
+      if (computeTimeoutRef.current) {
+        clearTimeout(computeTimeoutRef.current);
+      }
+      computeTimeoutRef.current = setTimeout(() => {
+        compute();
+      }, 100);
+    }
+  }, [rates10sAgo, isLiveMode]);
+
+  // useEffect dla reagowania na zmiany rates
+  useEffect(() => {
+    if (Object.keys(rates).length > 0) {
+      ratesRef.current = rates;
+      // Debounce compute calls
+      if (computeTimeoutRef.current) {
+        clearTimeout(computeTimeoutRef.current);
+      }
+      computeTimeoutRef.current = setTimeout(() => {
+        compute();
+      }, 100);
+    }
+  }, [rates]);
 
   const compute = () => {
     const now = Date.now();
@@ -62,6 +92,21 @@ export function RankingsSection(){
     const currentRates = ratesRef.current;
     const oldRates = isLiveMode ? historicalRates24h : rates10sAgo;
     
+    console.log("Computing rankings:", { isLiveMode, currentRates, oldRates });
+    
+    // Sprawdź czy mamy dane do porównania
+    if (Object.keys(currentRates).length === 0 || Object.keys(oldRates).length === 0) {
+      console.log("No rates data available yet");
+      return;
+    }
+    
+    // Sprawdź czy nie wywołujemy zbyt często
+    if (now - lastComputeTs.current < 1000) {
+      console.log("Compute called too frequently, skipping");
+      return;
+    }
+    lastComputeTs.current = now;
+    
     const changes: RankingItem[] = Object.entries(currentRates)
       .filter(([code]) => code !== 'PLN' && oldRates[code])
       .map(([code, currentRate]) => {
@@ -74,6 +119,8 @@ export function RankingsSection(){
 
     const gains = changes.filter(item => item.change > 0).slice(0, 3);
     const losses = changes.filter(item => item.change < 0).slice(0, 3);
+
+    console.log("Rankings computed:", { gains, losses });
 
     // Fallback jeśli brak zmian - pokazujemy top/bottom według kursu
     if (gains.length === 0) {

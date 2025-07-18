@@ -62,7 +62,7 @@ const aliasMap: Record<string,string> = {
 };
 
 export function TopNavigation() {
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const [theme, setTheme] = useState<'light' | 'dark'>('dark');
   const [layout, setLayout] = useState<'mobile' | 'desktop'>('mobile');
   const { rates, isLiveMode, toggleLiveMode } = useWallet();
   const [query,setQuery]=useState("");
@@ -85,7 +85,7 @@ export function TopNavigation() {
   useEffect(() => {
     // Check if dark mode is set in HTML class
     const isDarkMode = document.documentElement.classList.contains('dark');
-    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' || (isDarkMode ? 'dark' : 'light');
+    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' || (isDarkMode ? 'dark' : 'dark'); // Default to dark
     const savedLayout = localStorage.getItem('layout') as 'mobile' | 'desktop' || 'mobile';
     
     setTheme(savedTheme);

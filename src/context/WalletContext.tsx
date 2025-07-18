@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState, useRef } from "react";
 import { toast } from "@/components/ui/sonner";
 
 interface Transaction {
@@ -211,10 +211,97 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   
   const [rates, setRates] = useState<Record<string, number>>({});
   const [rates10sAgo, setRates10sAgo] = useState<Record<string, number>>({});
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const ratesRef = useRef<Record<string, number>>({});
+  const [transactions, setTransactions] = useState<Transaction[]>([
+    // Fikcyjne transakcje
+    {
+      id: "1",
+      type: 'deposit',
+      currency: 'PLN',
+      amount: 2500,
+      timestamp: Date.now() - 3600000, // 1 godzina temu
+    },
+    {
+      id: "2",
+      type: 'exchange',
+      currency: 'USD',
+      amount: 500,
+      from: 'PLN',
+      to: 'USD',
+      received: 127.55,
+      timestamp: Date.now() - 7200000, // 2 godziny temu
+    },
+    {
+      id: "3",
+      type: 'withdraw',
+      currency: 'EUR',
+      amount: 200,
+      timestamp: Date.now() - 10800000, // 3 godziny temu
+    },
+    {
+      id: "4",
+      type: 'deposit',
+      currency: 'USD',
+      amount: 800,
+      timestamp: Date.now() - 14400000, // 4 godziny temu
+    },
+    {
+      id: "5",
+      type: 'exchange',
+      currency: 'EUR',
+      amount: 300,
+      from: 'USD',
+      to: 'EUR',
+      received: 275.86,
+      timestamp: Date.now() - 18000000, // 5 godzin temu
+    },
+    {
+      id: "6",
+      type: 'withdraw',
+      currency: 'PLN',
+      amount: 1500,
+      timestamp: Date.now() - 21600000, // 6 godzin temu
+    },
+    {
+      id: "7",
+      type: 'deposit',
+      currency: 'EUR',
+      amount: 600,
+      timestamp: Date.now() - 25200000, // 7 godzin temu
+    },
+    {
+      id: "8",
+      type: 'exchange',
+      currency: 'PLN',
+      amount: 400,
+      from: 'EUR',
+      to: 'PLN',
+      received: 1648.00,
+      timestamp: Date.now() - 28800000, // 8 godzin temu
+    },
+    {
+      id: "9",
+      type: 'withdraw',
+      currency: 'USD',
+      amount: 150,
+      timestamp: Date.now() - 32400000, // 9 godzin temu
+    },
+    {
+      id: "10",
+      type: 'deposit',
+      currency: 'PLN',
+      amount: 1200,
+      timestamp: Date.now() - 36000000, // 10 godzin temu
+    },
+  ]);
   const [lastUpdate, setLastUpdate] = useState(Date.now());
   const [lastTransaction, setLastTransaction] = useState<Transaction | null>(null);
   const [isLiveMode, setIsLiveMode] = useState(false);
+
+  // Aktualizuj ref gdy rates się zmienia
+  useEffect(() => {
+    ratesRef.current = rates;
+  }, [rates]);
 
   // Pobieranie aktualnych kursów przy starcie
   useEffect(() => {
@@ -263,6 +350,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let interval: NodeJS.Timeout;
     let snapshotInterval: NodeJS.Timeout;
+    let portfolioUpdateInterval: NodeJS.Timeout;
 
     if (isLiveMode) {
       // Tryb na żywo - aktualizacja co 30 sekund z API
@@ -290,13 +378,29 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 
       // Snapshot co 10 sekund dla trybu testowego
       snapshotInterval = setInterval(() => {
-        setRates10sAgo(rates);
+        setRates10sAgo(prevRates => {
+          // Użyj funkcji callback żeby dostać aktualny stan rates
+          setRates(currentRates => {
+            if (Object.keys(currentRates).length > 0) {
+              console.log("Taking snapshot of rates:", currentRates);
+              return currentRates;
+            }
+            return currentRates;
+          });
+          return prevRates;
+        });
+      }, 10000);
+
+      // Aktualizacja portfolio co 10 sekund w trybie testowym
+      portfolioUpdateInterval = setInterval(() => {
+        setLastUpdate(Date.now());
       }, 10000);
     }
 
     return () => {
       clearInterval(interval);
       clearInterval(snapshotInterval);
+      clearInterval(portfolioUpdateInterval);
     };
   }, [isLiveMode, rates]);
 

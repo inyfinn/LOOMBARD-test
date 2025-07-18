@@ -16,7 +16,7 @@ interface PortfolioItem {
 }
 
 export function PortfolioSection() {
-  const { balances, rates, rates10sAgo, isLiveMode } = useWallet();
+  const { balances, rates, rates10sAgo, isLiveMode, lastUpdate } = useWallet();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -117,7 +117,7 @@ export function PortfolioSection() {
         totalValue24hAgo: 0
       };
     }
-  }, [portfolioData, rates, rates10sAgo, isLiveMode]);
+  }, [portfolioData, rates, rates10sAgo, isLiveMode, lastUpdate]); // Added lastUpdate dependency
 
   const totalPln = portfolioData.reduce((sum,item)=> sum + (item.currency==='PLN'? item.balance : item.balance*(item.rate||0)),0);
   const totalUsdValue = totalPln / (rates['USD']||4);
@@ -213,27 +213,34 @@ export function PortfolioSection() {
       <div className="grid grid-cols-3 gap-2">
         <Button
           variant="ghost"
-          className="h-auto p-3 flex flex-col items-center gap-2 hover:bg-accent"
+          className="h-auto p-3 flex flex-col items-center gap-2 hover:bg-accent relative group"
           onClick={() => setExchangeOpen(true)}
         >
-          <ArrowUpDown className="text-primary h-7 w-7" />
-          <span className="text-xs font-medium text-center">Wymień</span>
+          <ArrowUpDown className="text-primary h-8 w-8" />
+          <span className="text-sm font-medium text-center">Wymień</span>
+          <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-2 h-0.5 bg-gray-600 group-hover:w-3 group-hover:bg-green-500 transition-all duration-200"></div>
         </Button>
         <Button
           variant="ghost"
-          className="h-auto p-3 flex flex-col items-center gap-2 hover:bg-accent"
+          className="h-auto p-3 flex flex-col items-center gap-2 hover:bg-accent relative group"
           onClick={() => setDepositOpen(true)}
         >
-          <Wallet className="text-blue-500 h-7 w-7" />
-          <span className="text-xs font-medium text-center">Wpłać</span>
+          <svg className="text-blue-500 h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          </svg>
+          <span className="text-sm font-medium text-center">Dodaj</span>
+          <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-2 h-0.5 bg-gray-600 group-hover:w-3 group-hover:bg-green-500 transition-all duration-200"></div>
         </Button>
         <Button
           variant="ghost"
-          className="h-auto p-3 flex flex-col items-center gap-2 hover:bg-accent"
+          className="h-auto p-3 flex flex-col items-center gap-2 hover:bg-accent relative group"
           onClick={() => setWithdrawOpen(true)}
         >
-          <PiggyBank className="text-orange-500 h-7 w-7" />
-          <span className="text-xs font-medium text-center">Wypłać</span>
+          <svg className="text-orange-500 h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+          </svg>
+          <span className="text-sm font-medium text-center">Wypłać</span>
+          <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-2 h-0.5 bg-gray-600 group-hover:w-3 group-hover:bg-green-500 transition-all duration-200"></div>
         </Button>
       </div>
 

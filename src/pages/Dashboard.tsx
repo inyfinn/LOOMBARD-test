@@ -1,4 +1,3 @@
-import { TopNavigation } from "@/components/TopNavigation";
 import { PortfolioSection } from "@/components/PortfolioSection";
 import { PromoBanner } from "@/components/PromoBanner";
 import { CurrencyRatesTable } from "@/components/CurrencyRatesTable";
@@ -12,7 +11,6 @@ export default function Dashboard() {
   const { transactions } = useWallet();
   return (
     <div className="min-h-screen bg-background">
-      <TopNavigation />
       
       <main className="container max-w-7xl mx-auto px-4 py-6 pb-20">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

@@ -12,7 +12,6 @@ import { TopNavigation } from "./components/TopNavigation";
 import { WalletProvider } from "@/context/WalletContext";
 import TransactionsPage from "@/pages/Transactions";
 import OfferPage from "./pages/Offer";
-import { UpdateInfo } from "@/components/UpdateInfo";
 
 const queryClient = new QueryClient();
 
@@ -34,7 +33,6 @@ const App = () => (
               <Route path="*" element={<NotFound />} />
             </Routes>
             <BottomNav />
-            <UpdateInfo />
           </div>
         </BrowserRouter>
       </WalletProvider>

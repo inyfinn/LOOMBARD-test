@@ -102,10 +102,8 @@ export function showConfirmToast(
             width: typeof window !== 'undefined' && window.innerWidth < 640 ? 'calc(100vw - 60px)' : 'auto',
             position: 'fixed',
             left: '50%',
-            top: typeof window !== 'undefined' && window.innerWidth >= 1024 ? '20vh' : '50%',
-            transform: typeof window !== 'undefined' && window.innerWidth >= 1024 
-              ? 'translateX(-50%) scale(1.2)' 
-              : 'translateX(-50%) translateY(-50%)',
+            top: '50%',
+            transform: 'translateX(-50%) translateY(-50%)',
             zIndex: 10000,
             paddingLeft: typeof window !== 'undefined' && window.innerWidth >= 1024 ? 68 : undefined,
             paddingRight: typeof window !== 'undefined' && window.innerWidth >= 1024 ? 68 : undefined,

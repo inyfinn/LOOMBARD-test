@@ -1,4 +1,4 @@
-import { Search, Bell, User, Moon, Sun, Monitor, Smartphone, Radio } from "lucide-react";
+import { Search, Bell, User, Moon, Sun, Monitor, Smartphone, Radio, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState, useEffect } from "react";
@@ -161,7 +161,7 @@ export function TopNavigation() {
             }`}
             title={isLiveMode ? "Tryb na żywo" : "Tryb testowy"}
           >
-            <Radio size={18} className="mr-1" />
+            <Settings size={18} className="mr-1" />
             <span className="text-xs font-medium">
               {isLiveMode ? "na żywo" : "testowy"}
             </span>

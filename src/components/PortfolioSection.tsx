@@ -1,22 +1,22 @@
-import { useEffect, useState, useMemo } from "react";
+import { useWallet } from "@/context/WalletContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowUpDown, Wallet, ArrowRight, PiggyBank, Wallet as WalletIn, TrendingUp, TrendingDown } from "lucide-react";
+import { TrendingUp, TrendingDown, ArrowUpDown, Wallet, PiggyBank } from "lucide-react";
+import { useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ExchangeDialog } from "@/components/ExchangeDialog";
 import { DepositDialog } from "@/components/DepositDialog";
 import { WithdrawDialog } from "@/components/WithdrawDialog";
-import { useWallet } from "@/context/WalletContext";
-import { toast } from "@/hooks/use-toast";
 
 interface PortfolioItem {
   currency: string;
   balance: number;
-  rate?: number;
+  rate: number;
 }
 
 export function PortfolioSection() {
-  const { balances, rates } = useWallet();
+  const { balances, rates, rates10sAgo, isLiveMode } = useWallet();
   const navigate = useNavigate();
 
   const portfolioData: PortfolioItem[] = useMemo(() => {
@@ -68,22 +68,23 @@ export function PortfolioSection() {
     TOP: 1.62, TTD: 0.57, VUV: 0.032, WST: 1.38, YER: 0.015, ZMW: 0.15, ZWL: 0.012
   };
 
-  // Obliczanie zysku/straty na podstawie zmian kursów
   const calculatePortfolioChange = useMemo(() => {
-    let totalValue24hAgo = 0;
+    const oldRates = isLiveMode ? historicalRates24h : rates10sAgo;
+    
     let totalValueNow = 0;
+    let totalValue24hAgo = 0;
 
-    portfolioData.forEach((item) => {
-      const currentRate = item.rate || 1;
-      const historicalRate = historicalRates24h[item.currency] || currentRate;
-      
-      // Wartość w PLN 24h temu
-      const value24hAgo = item.balance * historicalRate;
-      // Wartość w PLN teraz
-      const valueNow = item.balance * currentRate;
-      
-      totalValue24hAgo += value24hAgo;
-      totalValueNow += valueNow;
+    portfolioData.forEach(({ currency, balance, rate }) => {
+      const currentValue = balance * rate;
+      totalValueNow += currentValue;
+
+      const oldRate = oldRates[currency];
+      if (oldRate) {
+        const oldValue = balance * oldRate;
+        totalValue24hAgo += oldValue;
+      } else {
+        totalValue24hAgo += currentValue; // fallback
+      }
     });
 
     const changeAmount = totalValueNow - totalValue24hAgo;
@@ -96,7 +97,7 @@ export function PortfolioSection() {
       totalValueNow,
       totalValue24hAgo
     };
-  }, [portfolioData, rates]);
+  }, [portfolioData, rates, rates10sAgo, isLiveMode]);
 
   const totalPln = portfolioData.reduce((sum,item)=> sum + (item.currency==='PLN'? item.balance : item.balance*(item.rate||0)),0);
   const totalUsdValue = totalPln / (rates['USD']||4);
@@ -121,82 +122,65 @@ export function PortfolioSection() {
               <span className={`text-xs ${calculatePortfolioChange.isPositive ? 'text-green-300' : 'text-red-300'}`}>
                 {calculatePortfolioChange.isPositive ? '+' : ''}{calculatePortfolioChange.changePercentage.toFixed(2)}%
               </span>
+              <span className="text-xs text-white/70 ml-1">
+                ({isLiveMode ? '24h' : '10s'})
+              </span>
             </div>
           </div>
           <h2 className="text-4xl font-bold text-white">
-                {formatCurrency(totalPln, 'PLN')}
-              </h2>
-          <p className="text-white/80 dark:text-primary/80 text-sm mb-2">≈ ${totalUsdValue.toFixed(2)} USD</p>
-          
-          {/* Zysk/Strata */}
-          <p className={`text-sm mb-5 ${calculatePortfolioChange.isPositive ? 'text-green-300' : 'text-red-300'}`}>
-            {calculatePortfolioChange.isPositive ? '+' : ''}{calculatePortfolioChange.changeAmount.toFixed(2)} PLN (24h)
+            {formatCurrency(totalPln, 'PLN')}
+          </h2>
+          <p className="text-sm text-white/80 mt-1">
+            ≈ {formatCurrency(totalUsdValue, 'USD')}
           </p>
-
-          <div className="flex gap-3 mt-5">
-            <Button
-              className="bg-white text-primary hover:bg-primary/10 dark:bg-primary dark:hover:bg-primary/90 dark:text-white border border-white dark:border-transparent"
-              onClick={() => setExchangeOpen(true)}
-            >
-                <ArrowUpDown size={16} className="mr-1" />
-                Wymień
-              </Button>
-            <Button className="border border-white text-white bg-transparent hover:bg-white/10 dark:bg-transparent dark:border dark:border-primary dark:text-primary" onClick={()=> setDepositOpen(true)}>
-              <WalletIn size={16} className="mr-1" />
-              Dodaj
-            </Button>
-            <Button className="border border-white text-white bg-transparent hover:bg-white/10 dark:bg-transparent dark:border dark:border-primary dark:text-primary" onClick={()=> setWithdrawOpen(true)}>
-              <PiggyBank size={16} className="mr-1" />
-              Wypłać
-            </Button>
-          </div>
+          {Math.abs(calculatePortfolioChange.changeAmount) > 0.01 && (
+            <p className={`text-sm mt-2 ${calculatePortfolioChange.isPositive ? 'text-green-300' : 'text-red-300'}`}>
+              {calculatePortfolioChange.isPositive ? '+' : ''}{formatCurrency(calculatePortfolioChange.changeAmount, 'PLN')}
+            </p>
+          )}
         </CardContent>
       </Card>
 
       {/* Portfolio Breakdown */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Wallet size={20} />
-            Portfel
-          </CardTitle>
+          <CardTitle>Portfel</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {portfolioData.slice(0,5).map((item) => {
-            const currentRate = item.rate || 1;
-            const historicalRate = historicalRates24h[item.currency] || currentRate;
-            const change = ((currentRate - historicalRate) / historicalRate) * 100;
+          {portfolioData.map((item) => {
+            const oldRates = isLiveMode ? historicalRates24h : rates10sAgo;
+            const oldRate = oldRates[item.currency];
+            const change = oldRate ? ((item.rate - oldRate) / oldRate) * 100 : 0;
             const isPositive = change > 0;
             
             return (
               <div key={item.currency} className="flex items-center justify-between py-3 border-b border-border last:border-0">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                    <span className="font-bold text-primary">{item.currency[0]}</span>
+                    <span className="text-sm font-bold text-primary">
+                      {item.currency}
+                    </span>
                   </div>
                   <div>
                     <p className="font-medium">{item.currency}</p>
-                    {item.rate && item.currency !== 'PLN' && (
-                      <p className="text-sm text-muted-foreground">
-                        1 {item.currency} = {item.rate.toFixed(4)} PLN
-                      </p>
-                    )}
+                    <p className="text-sm text-muted-foreground">
+                      {formatCurrency(animatedBalances[item.currency] || 0, item.currency)}
+                    </p>
                   </div>
                 </div>
-                
                 <div className="text-right">
-                  <p className="font-medium">
-                    {formatCurrency(animatedBalances[item.currency] || 0, item.currency)}
-                  </p>
-                  {item.currency !== 'USD' && (
-                    <p className="text-sm text-muted-foreground">
-                      ≈ ${(item.currency === 'PLN' ? item.balance / (rates['USD'] || 4) : item.balance * (item.rate || 0) / (rates['USD'] || 4)).toFixed(2)} USD
-                    </p>
-                  )}
-                  {item.currency !== 'PLN' && (
-                    <p className={`text-xs ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
-                      {isPositive ? '+' : ''}{change.toFixed(2)}% (24h)
-                    </p>
+                  <p className="font-medium">{item.rate.toFixed(4)} PLN</p>
+                  {Math.abs(change) > 0.001 && (
+                    <div className="flex items-center gap-1 justify-end mt-1">
+                      {isPositive ? (
+                        <TrendingUp size={12} className="text-green-500" />
+                      ) : (
+                        <TrendingDown size={12} className="text-red-500" />
+                      )}
+                      <span className={`text-xs ${isPositive ? 'text-green-500' : 'text-red-500'}`}>
+                        {isPositive ? '+' : ''}{change.toFixed(2)}%
+                      </span>
+                    </div>
                   )}
                 </div>
               </div>
@@ -205,15 +189,35 @@ export function PortfolioSection() {
         </CardContent>
       </Card>
 
-      {/* Show more button if more than 5 */}
-      {portfolioData.length > 5 && (
-        <div className="flex justify-end pr-2">
-          <Button variant="ghost" onClick={() => navigate('/portfel')} className="rounded-full bg-green-600 hover:bg-green-700 text-white p-3 shadow-md">
-            <ArrowRight size={20} />
-          </Button>
-        </div>
-      )}
+      {/* Quick Actions */}
+      <div className="grid grid-cols-3 gap-2">
+        <Button
+          variant="ghost"
+          className="h-auto p-3 flex flex-col items-center gap-2 hover:bg-accent"
+          onClick={() => setExchangeOpen(true)}
+        >
+          <ArrowUpDown className="text-primary h-7 w-7" />
+          <span className="text-xs font-medium text-center">Wymień</span>
+        </Button>
+        <Button
+          variant="ghost"
+          className="h-auto p-3 flex flex-col items-center gap-2 hover:bg-accent"
+          onClick={() => setDepositOpen(true)}
+        >
+          <Wallet className="text-blue-500 h-7 w-7" />
+          <span className="text-xs font-medium text-center">Wpłać</span>
+        </Button>
+        <Button
+          variant="ghost"
+          className="h-auto p-3 flex flex-col items-center gap-2 hover:bg-accent"
+          onClick={() => setWithdrawOpen(true)}
+        >
+          <PiggyBank className="text-orange-500 h-7 w-7" />
+          <span className="text-xs font-medium text-center">Wypłać</span>
+        </Button>
+      </div>
 
+      {/* Dialogs */}
       <ExchangeDialog open={exchangeOpen} onOpenChange={setExchangeOpen} />
       <DepositDialog open={depositOpen} onOpenChange={setDepositOpen} />
       <WithdrawDialog open={withdrawOpen} onOpenChange={setWithdrawOpen} />

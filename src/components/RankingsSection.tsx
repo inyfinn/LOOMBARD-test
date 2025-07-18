@@ -1,15 +1,13 @@
+import { useWallet } from "@/context/WalletContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TrendingUp, TrendingDown } from "lucide-react";
-import { useWallet } from "@/context/WalletContext";
-import { useRef, useEffect, useState } from "react";
+import { useState, useEffect, useRef } from "react";
 
 interface RankingItem {
-  symbol: string;
-  name: string;
-  value: string;
+  code: string;
   change: number;
-  category: 'gains' | 'losses' | 'searched' | 'traded';
+  rate: number;
 }
 
 const categoryConfig = {
@@ -18,7 +16,7 @@ const categoryConfig = {
 };
 
 export function RankingsSection(){
-  const { rates } = useWallet();
+  const { rates, rates10sAgo, isLiveMode } = useWallet();
   const snapshot = useRef<Record<string, number>>(rates);
   const ratesRef = useRef(rates);
   const lastComputeTs = useRef<number>(0);
@@ -60,95 +58,98 @@ export function RankingsSection(){
       SOS: 0.0067, SRD: 0.12, STD: 0.00018, SVC: 0.45, SYP: 0.0015, SZL: 0.21,
       TOP: 1.62, TTD: 0.57, VUV: 0.032, WST: 1.38, YER: 0.015, ZMW: 0.15, ZWL: 0.012
     };
+
+    const currentRates = ratesRef.current;
+    const oldRates = isLiveMode ? historicalRates24h : rates10sAgo;
     
-    const items: RankingItem[] = Object.entries(ratesRef.current).map(([code, rate]) => {
-      const old = historicalRates24h[code] ?? rate;
-      const change = ((rate - old) / old) * 100;
-      return { symbol: code, name: code, value: `${change.toFixed(2)}%`, change, category: change >= 0 ? 'gains' : 'losses' };
-    });
-    let gains = items.filter(i => i.change > 0).sort((a, b) => b.change - a.change).slice(0, 5);
-    let losses = items.filter(i => i.change < 0).sort((a, b) => a.change - b.change).slice(0, 5);
-    
-    // fallback: if no positive/negative changes (first load), pick top/bottom by rate
+    const changes: RankingItem[] = Object.entries(currentRates)
+      .filter(([code]) => code !== 'PLN' && oldRates[code])
+      .map(([code, currentRate]) => {
+        const oldRate = oldRates[code];
+        const change = ((currentRate - oldRate) / oldRate) * 100;
+        return { code, change, rate: currentRate };
+      })
+      .sort((a, b) => Math.abs(b.change) - Math.abs(a.change))
+      .slice(0, 5);
+
+    const gains = changes.filter(item => item.change > 0).slice(0, 3);
+    const losses = changes.filter(item => item.change < 0).slice(0, 3);
+
+    // Fallback jeśli brak zmian - pokazujemy top/bottom według kursu
     if (gains.length === 0) {
-      const allItems = Object.entries(ratesRef.current).map(([code, rate]) => ({
-        symbol: code, 
-        name: code, 
-        value: `${rate.toFixed(4)} PLN`, 
-        change: 0, 
-        category: 'gains' as const
-      }));
-      gains = allItems.sort((a, b) => parseFloat(b.value) - parseFloat(a.value)).slice(0, 5);
+      const topByRate = Object.entries(currentRates)
+        .filter(([code]) => code !== 'PLN')
+        .sort(([, a], [, b]) => b - a)
+        .slice(0, 3)
+        .map(([code, rate]) => ({ code, change: 0, rate }));
+      setGroupedData({ gains: topByRate, losses });
+    } else if (losses.length === 0) {
+      const bottomByRate = Object.entries(currentRates)
+        .filter(([code]) => code !== 'PLN')
+        .sort(([, a], [, b]) => a - b)
+        .slice(0, 3)
+        .map(([code, rate]) => ({ code, change: 0, rate }));
+      setGroupedData({ gains, losses: bottomByRate });
+    } else {
+      setGroupedData({ gains, losses });
     }
-    if (losses.length === 0) {
-      const allItems = Object.entries(ratesRef.current).map(([code, rate]) => ({
-        symbol: code, 
-        name: code, 
-        value: `${rate.toFixed(4)} PLN`, 
-        change: 0, 
-        category: 'losses' as const
-      }));
-      losses = allItems.sort((a, b) => parseFloat(a.value) - parseFloat(b.value)).slice(0, 5);
-    }
-    
-    setGroupedData({ gains, losses });
-    snapshot.current = ratesRef.current;
-    lastComputeTs.current = now;
   };
 
-  const renderRankingCard = (category: keyof typeof categoryConfig, items: RankingItem[]) => {
-    const config = categoryConfig[category];
-    const Icon = config.icon;
-
+  const formatChange = (change: number) => {
+    const isPositive = change > 0;
     return (
-      <Card key={category} className="h-full">
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Icon size={18} className={config.color} />
-            {config.title}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          {items.map((item, index) => (
-            <div key={item.symbol} className="flex items-center justify-between py-2">
-              <div className="flex items-center gap-2">
-                <span className="w-6 h-6 rounded-full bg-muted flex items-center justify-center text-xs font-bold">
-                  {index + 1}
-                </span>
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                  <span className="text-xs font-bold text-primary">{item.symbol}</span>
-                </div>
-                <div>
-                  <p className="font-medium text-sm">{item.symbol}</p>
-                  <p className="text-xs text-muted-foreground">{item.name}</p>
-                </div>
-              </div>
-              
-              <div className="text-right">
-                {category === 'gains' || category === 'losses' ? (
-                  <Badge variant={item.change > 0 ? "default" : "destructive"} className="text-xs">
-                    {item.change > 0 ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
-                    {item.value}
-                  </Badge>
-                ) : (
-                  <p className="text-xs font-medium">{item.value}</p>
-                )}
-              </div>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
+      <Badge variant={isPositive ? "default" : "destructive"} className="flex items-center gap-1">
+        {isPositive ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+        {isPositive ? '+' : ''}{change.toFixed(2)}%
+      </Badge>
     );
   };
 
   return (
-    <div>
-      <h2 className="text-lg font-semibold mb-4">Rankingi 24h</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
-        {Object.entries(groupedData).map(([category, items]) =>
-          renderRankingCard(category as keyof typeof categoryConfig, items)
-        )}
-      </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {Object.entries(categoryConfig).map(([category, config]) => {
+        const data = groupedData[category as keyof typeof groupedData] || [];
+        const { icon: Icon, title, color } = config;
+        
+        return (
+          <Card key={category}>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Icon className={color} size={20} />
+                {title}
+                <span className="text-sm font-normal text-muted-foreground">
+                  ({isLiveMode ? '24h' : '10s'})
+                </span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {data.map((item, index) => (
+                  <div key={item.code} className="flex items-center justify-between py-2">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                        <span className="text-xs font-bold text-primary">
+                          {item.code.slice(0, 2)}
+                        </span>
+                      </div>
+                      <div>
+                        <p className="font-medium">{item.code}</p>
+                        <p className="text-sm text-muted-foreground">{item.rate.toFixed(4)} PLN</p>
+                      </div>
+                    </div>
+                    {formatChange(item.change)}
+                  </div>
+                ))}
+                {data.length === 0 && (
+                  <p className="text-sm text-muted-foreground text-center py-4">
+                    Brak danych
+                  </p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        );
+      })}
     </div>
   );
 }

@@ -20,6 +20,7 @@ interface ExchangeResult {
 interface WalletContextType {
   balances: Record<string, number>;
   rates: Record<string, number>;
+  rates10sAgo: Record<string, number>;
   transactions: Transaction[];
   lastUpdate: number;
   isLiveMode: boolean;
@@ -195,7 +196,7 @@ async function fetchCurrentRates(): Promise<Record<string, number>> {
 
 // Funkcja do generowania losowych wahań w trybie testowym
 function generateTestFluctuation(currentRate: number): number {
-  const fluctuation = 0.003; // 0.3% wahanie
+  const fluctuation = 0.0015; // 0.15% wahanie (zmniejszone z 0.3%)
   const direction = Math.random() > 0.5 ? 1 : -1; // losowo w górę lub w dół
   const change = currentRate * fluctuation * direction;
   return currentRate + change;
@@ -203,12 +204,13 @@ function generateTestFluctuation(currentRate: number): number {
 
 export function WalletProvider({ children }: { children: React.ReactNode }) {
   const [balances, setBalances] = useState<Record<string, number>>({
-    PLN: 10000,
-    USD: 2500,
-    EUR: 2300,
+    PLN: 5000,
+    EUR: 1000,
+    USD: 1000,
   });
   
   const [rates, setRates] = useState<Record<string, number>>({});
+  const [rates10sAgo, setRates10sAgo] = useState<Record<string, number>>({});
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [lastUpdate, setLastUpdate] = useState(Date.now());
   const [lastTransaction, setLastTransaction] = useState<Transaction | null>(null);
@@ -219,6 +221,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     const initializeRates = async () => {
       const currentRates = await fetchCurrentRates();
       setRates(currentRates);
+      setRates10sAgo(currentRates); // Inicjalnie ustawiamy te same kursy
       setLastUpdate(Date.now());
     };
     
@@ -228,6 +231,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   // Aktualizacja kursów w zależności od trybu
   useEffect(() => {
     let interval: NodeJS.Timeout;
+    let snapshotInterval: NodeJS.Timeout;
 
     if (isLiveMode) {
       // Tryb na żywo - aktualizacja co 30 sekund z API
@@ -252,10 +256,18 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         });
         setLastUpdate(Date.now());
       }, 500); // 0.5 sekundy
+
+      // Snapshot co 10 sekund dla trybu testowego
+      snapshotInterval = setInterval(() => {
+        setRates10sAgo(rates);
+      }, 10000);
     }
 
-    return () => clearInterval(interval);
-  }, [isLiveMode]);
+    return () => {
+      clearInterval(interval);
+      clearInterval(snapshotInterval);
+    };
+  }, [isLiveMode, rates]);
 
   const toggleLiveMode = () => {
     setIsLiveMode(prev => !prev);
@@ -371,6 +383,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     <WalletContext.Provider value={{
       balances,
       rates,
+      rates10sAgo,
       transactions,
       lastUpdate,
       isLiveMode,

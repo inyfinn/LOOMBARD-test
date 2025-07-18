@@ -173,17 +173,17 @@ All colors MUST be HSL.
 }
 
 @keyframes shake-desktop {
-  0% { transform: translateX(-50%) scale(1.2); }
-  10% { transform: translateX(-50%) scale(1.2) translateY(-4px); }
-  20% { transform: translateX(-50%) scale(1.2) translateY(4px); }
-  30% { transform: translateX(-50%) scale(1.2) translateY(-4px); }
-  40% { transform: translateX(-50%) scale(1.2) translateY(4px); }
-  50% { transform: translateX(-50%) scale(1.2) translateY(-4px); }
-  60% { transform: translateX(-50%) scale(1.2) translateY(4px); }
-  70% { transform: translateX(-50%) scale(1.2) translateY(-4px); }
-  80% { transform: translateX(-50%) scale(1.2) translateY(4px); }
-  90% { transform: translateX(-50%) scale(1.2) translateY(-2px); }
-  100% { transform: translateX(-50%) scale(1.2); }
+  0% { transform: translateX(-50%) translateY(-50%) scale(1.2); }
+  10% { transform: translateX(-50%) translateY(-50%) scale(1.2) translateY(-4px); }
+  20% { transform: translateX(-50%) translateY(-50%) scale(1.2) translateY(4px); }
+  30% { transform: translateX(-50%) translateY(-50%) scale(1.2) translateY(-4px); }
+  40% { transform: translateX(-50%) translateY(-50%) scale(1.2) translateY(4px); }
+  50% { transform: translateX(-50%) translateY(-50%) scale(1.2) translateY(-4px); }
+  60% { transform: translateX(-50%) translateY(-50%) scale(1.2) translateY(4px); }
+  70% { transform: translateX(-50%) translateY(-50%) scale(1.2) translateY(-4px); }
+  80% { transform: translateX(-50%) translateY(-50%) scale(1.2) translateY(4px); }
+  90% { transform: translateX(-50%) translateY(-50%) scale(1.2) translateY(-2px); }
+  100% { transform: translateX(-50%) translateY(-50%) scale(1.2); }
 }
 
 .shake {

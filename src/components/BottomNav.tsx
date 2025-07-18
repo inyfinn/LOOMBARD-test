@@ -1,9 +1,10 @@
-import { Home, BarChart3, TrendingUp, Settings } from "lucide-react";
+import { Home, BarChart3, TrendingUp, Settings, Wallet } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { path: "/", icon: Home, label: "Start" },
+  { path: "/portfel", icon: Wallet, label: "Portfel" },
   { path: "/kursy", icon: BarChart3, label: "Kursy" },
   { path: "/rankingi", icon: TrendingUp, label: "Rankingi" },
   { path: "/ustawienia", icon: Settings, label: "Ustawienia" },

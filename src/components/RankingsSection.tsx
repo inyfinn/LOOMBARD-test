@@ -83,7 +83,7 @@ export function RankingsSection() {
   return (
     <div>
       <h2 className="text-lg font-semibold mb-4">Rankingi 24h</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
         {Object.entries(groupedData).map(([category, items]) =>
           renderRankingCard(category as keyof typeof categoryConfig, items)
         )}

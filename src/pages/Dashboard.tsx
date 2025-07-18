@@ -5,8 +5,11 @@ import { CurrencyRatesTable } from "@/components/CurrencyRatesTable";
 import { RankingsSection } from "@/components/RankingsSection";
 import { QuickActions } from "@/components/QuickActions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useWallet } from "@/context/WalletContext";
+import { ArrowUp, ArrowDown, ArrowLeftRight } from "lucide-react";
 
 export default function Dashboard() {
+  const { transactions } = useWallet();
   return (
     <div className="min-h-screen bg-background">
       <TopNavigation />
@@ -45,53 +48,55 @@ export default function Dashboard() {
                 <CardTitle>Ostatnia aktywność</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex justify-between items-center py-3 border-b border-border">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                      <span className="text-xs font-bold text-primary">USD</span>
+                {transactions.slice(0,5).map((t,idx)=>{
+                  const date = new Date(t.timestamp).toLocaleString('pl-PL',{hour:'2-digit', minute:'2-digit'});
+                  if(t.type==='deposit') return (
+                    <div key={idx} className="flex justify-between items-center py-3 border-b border-border last:border-0">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+                          <ArrowDown className="h-4 w-4 text-green-600" />
+                        </div>
+                        <div>
+                          <p className="font-medium">Wpłata {t.currency}</p>
+                          <p className="text-xs text-muted-foreground">{date}</p>
+                        </div>
+                      </div>
+                      <p className="font-medium text-green-600">+{t.amount.toFixed(2)} {t.currency}</p>
                     </div>
-                    <div>
-                      <p className="font-medium">Wymiana USD → PLN</p>
-                      <p className="text-sm text-muted-foreground">Wczoraj, 14:30</p>
+                  );
+                  if(t.type==='withdraw') return (
+                    <div key={idx} className="flex justify-between items-center py-3 border-b border-border last:border-0">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
+                          <ArrowUp className="h-4 w-4 text-red-600" />
+                        </div>
+                        <div>
+                          <p className="font-medium">Wypłata {t.currency}</p>
+                          <p className="text-xs text-muted-foreground">{date}</p>
+                        </div>
+                      </div>
+                      <p className="font-medium text-red-600">-{t.amount.toFixed(2)} {t.currency}</p>
                     </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-medium text-green-600">+1,205.00 PLN</p>
-                    <p className="text-sm text-muted-foreground">-300.00 USD</p>
-                  </div>
-                </div>
-                
-                <div className="flex justify-between items-center py-3 border-b border-border">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                      <span className="text-xs font-bold text-primary">EUR</span>
+                  );
+                  if(t.type==='exchange') return (
+                    <div key={idx} className="flex justify-between items-center py-3 border-b border-border last:border-0">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                          <ArrowLeftRight className="h-4 w-4 text-primary" />
+                        </div>
+                        <div>
+                          <p className="font-medium">Wymiana {t.from} → {t.to}</p>
+                          <p className="text-xs text-muted-foreground">{date}</p>
+                        </div>
+                      </div>
+                      <div className="text-right text-sm">
+                        <p className="text-green-600">+{t.received.toFixed(2)} {t.to}</p>
+                        <p className="text-red-600">-{t.amount.toFixed(2)} {t.from}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-medium">Przelew EUR</p>
-                      <p className="text-sm text-muted-foreground">2 dni temu</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-medium text-red-600">-500.00 EUR</p>
-                    <p className="text-sm text-muted-foreground">Do Niemiec</p>
-                  </div>
-                </div>
-                
-                <div className="flex justify-between items-center py-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                      <span className="text-xs font-bold text-primary">PLN</span>
-                    </div>
-                    <div>
-                      <p className="font-medium">Wpłata gotówki</p>
-                      <p className="text-sm text-muted-foreground">3 dni temu</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-medium text-green-600">+2,000.00 PLN</p>
-                    <p className="text-sm text-muted-foreground">Bank PKO BP</p>
-                  </div>
-                </div>
+                  );
+                })}
+                {transactions.length === 0 && <p className="text-sm text-muted-foreground">Brak aktywności.</p>}
               </CardContent>
             </Card>
           </div>

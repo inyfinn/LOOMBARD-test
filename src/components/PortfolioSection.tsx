@@ -1,25 +1,29 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { TrendingUp, TrendingDown, ArrowUpDown, Send, Wallet } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { ArrowUpDown, Wallet, ArrowRight, PiggyBank } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { ExchangeDialog } from "@/components/ExchangeDialog";
+import { useWallet } from "@/context/WalletContext";
 
-interface PortfolioData {
+interface PortfolioItem {
   currency: string;
   balance: number;
   rate?: number;
-  change?: number;
-  isPrimary?: boolean;
-  usdValue?: number;
 }
 
-const portfolioData: PortfolioData[] = [
-  { currency: "PLN", balance: 15842.75, isPrimary: true },
-  { currency: "USD", balance: 2456.80, rate: 4.0234, change: -0.15, usdValue: 2456.80 },
-  { currency: "EUR", balance: 1875.20, rate: 4.3456, change: 0.23, usdValue: 2031.47 },
-];
-
 export function PortfolioSection() {
+  const { balances, rates } = useWallet();
+  const navigate = useNavigate();
+
+  const portfolioData: PortfolioItem[] = useMemo(() => {
+    return Object.entries(balances).map(([currency, balance]) => ({
+      currency,
+      balance,
+      rate: rates[currency],
+    }));
+  }, [balances, rates]);
+
   const [animatedBalances, setAnimatedBalances] = useState<Record<string, number>>({});
 
   useEffect(() => {
@@ -41,37 +45,35 @@ export function PortfolioSection() {
   };
 
   const totalUsdValue = portfolioData.reduce((total, item) => {
-    if (item.currency === 'PLN') return total + (item.balance / 4.0234);
-    return total + (item.usdValue || 0);
+    const plnValue = item.currency === 'PLN' ? item.balance : item.balance * (item.rate || 0);
+    return total + plnValue / (rates['USD'] || 4);
   }, 0);
 
-  const primaryBalance = portfolioData.find(item => item.isPrimary);
+  const [open, setOpen] = useState(false);
 
   return (
     <div className="space-y-6">
       {/* Main Balance Display */}
-      <Card className="bg-gradient-to-r from-primary-500 to-primary-600 text-white">
+      <Card className="bg-card border border-primary text-primary">
         <CardContent className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <p className="text-white/80 text-sm">Całkowite saldo</p>
-              <h2 className="text-3xl font-bold">
+          <p className="text-sm mb-1">Całkowite saldo</p>
+          <h2 className="text-4xl font-bold text-white">
                 {formatCurrency(animatedBalances['PLN'] || 0, 'PLN')}
               </h2>
-              <p className="text-white/70 text-sm">
-                ≈ ${totalUsdValue.toFixed(2)} USD
-              </p>
-            </div>
-            <div className="flex flex-col gap-2">
-              <Button variant="secondary" size="sm" className="bg-white/20 hover:bg-white/30 text-white border-white/30">
+          <p className="text-primary/70 text-sm mb-5">≈ ${totalUsdValue.toFixed(2)} USD</p>
+
+          <div className="flex gap-3 mt-5">
+            <Button
+              className="bg-primary hover:bg-primary/90 text-white"
+              onClick={() => setOpen(true)}
+            >
                 <ArrowUpDown size={16} className="mr-1" />
                 Wymień
               </Button>
-              <Button variant="secondary" size="sm" className="bg-white/20 hover:bg-white/30 text-white border-white/30">
-                <Send size={16} className="mr-1" />
-                Wyślij
+            <Button variant="ghost" className="border border-primary text-primary hover:bg-primary/10" onClick={()=>{/* open withdraw */}}>
+              <PiggyBank size={16} className="mr-1" />
+              Wypłać
               </Button>
-            </div>
           </div>
         </CardContent>
       </Card>
@@ -85,7 +87,7 @@ export function PortfolioSection() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {portfolioData.map((item) => (
+          {portfolioData.slice(0,5).map((item) => (
             <div key={item.currency} className="flex items-center justify-between py-3 border-b border-border last:border-0">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
@@ -93,7 +95,7 @@ export function PortfolioSection() {
                 </div>
                 <div>
                   <p className="font-medium">{item.currency}</p>
-                  {item.rate && (
+                  {item.rate && item.currency !== 'PLN' && (
                     <p className="text-sm text-muted-foreground">
                       1 {item.currency} = {item.rate.toFixed(4)} PLN
                     </p>
@@ -105,22 +107,27 @@ export function PortfolioSection() {
                 <p className="font-medium">
                   {formatCurrency(animatedBalances[item.currency] || 0, item.currency)}
                 </p>
-                {item.usdValue && (
+                {item.currency !== 'USD' && (
                   <p className="text-sm text-muted-foreground">
-                    ${item.usdValue.toFixed(2)}
+                    ≈ ${(item.currency === 'PLN' ? item.balance / (rates['USD'] || 4) : item.balance * (item.rate || 0) / (rates['USD'] || 4)).toFixed(2)} USD
                   </p>
-                )}
-                {item.change && (
-                  <Badge variant={item.change > 0 ? "default" : "destructive"} className="mt-1">
-                    {item.change > 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
-                    {Math.abs(item.change).toFixed(2)}%
-                  </Badge>
                 )}
               </div>
             </div>
           ))}
         </CardContent>
       </Card>
+
+      {/* Show more button if more than 5 */}
+      {portfolioData.length > 5 && (
+        <div className="flex justify-end pr-2">
+          <Button variant="ghost" onClick={() => navigate('/portfel')} className="rounded-full bg-green-600 hover:bg-green-700 text-white p-3 shadow-md">
+            <ArrowRight size={20} />
+          </Button>
+        </div>
+      )}
+
+      <ExchangeDialog open={open} onOpenChange={setOpen} />
     </div>
   );
 }

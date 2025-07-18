@@ -9,8 +9,9 @@ import Rankings from "./pages/Rankings";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import { BottomNav } from "./components/BottomNav";
+import { TopNavigation } from "./components/TopNavigation";
 import { WalletProvider } from "@/context/WalletContext";
-import TransactionsPage from "./pages/Transactions";
+import TransactionsPage from "@/pages/Transactions";
 import OfferPage from "./pages/Offer";
 import { UpdateInfo } from "@/components/UpdateInfo";
 
@@ -24,6 +25,7 @@ const App = () => (
       <WalletProvider>
         <BrowserRouter>
           <div className="relative">
+            <TopNavigation />
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/kursy" element={<Rates />} />

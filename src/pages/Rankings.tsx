@@ -26,20 +26,22 @@ export default function Rankings() {
         <CardHeader className="flex flex-row items-center justify-between py-4 px-4">
           <CardTitle>{title}</CardTitle>
           <div className="flex gap-2">
-            <button
-              className={`flex items-center text-[14px] px-3 py-2 rounded-md bg-muted hover:bg-muted/80 disabled:opacity-50`}
-              disabled={expanded}
-              onClick={() => setExpanded(true)}
-            >
-              <ArrowDown className="h-4 w-4 mr-1" /> pokaż wszystko
-            </button>
-            <button
-              className={`flex items-center text-[14px] px-3 py-2 rounded-md bg-red-600 text-white hover:bg-red-700 disabled:opacity-50`}
-              disabled={!expanded}
-              onClick={() => setExpanded(false)}
-            >
-              <ArrowUp className="h-4 w-4 mr-1" /> zwiń
-            </button>
+            {!expanded && (
+              <button
+                className="flex items-center text-[10px] px-3 py-2 rounded-md border border-green-600 dark:bg-black dark:text-white dark:hover:bg-black/80 bg-white text-black hover:bg-white/80"
+                onClick={() => setExpanded(true)}
+              >
+                <ArrowDown className="h-3 w-3 mr-1" /> Rozwiń
+              </button>
+            )}
+            {expanded && (
+              <button
+                className="flex items-center text-[10px] px-3 py-2 rounded-md border border-white text-white bg-black hover:bg-black/80"
+                onClick={() => setExpanded(false)}
+              >
+                <ArrowUp className="h-3 w-3 mr-1" /> Zwiń
+              </button>
+            )}
           </div>
         </CardHeader>
         <CardContent className="p-0">
@@ -69,27 +71,27 @@ export default function Rankings() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <ExpandableCard title="Wszystkie">
-            {(exp)=> <RankingsTable category="all" continent={continent} showCategoryTabs={false} maxRows={exp?undefined:10} />}
+            {(exp)=> <RankingsTable category="all" continent={continent} showCategoryTabs={false} maxRows={exp?undefined:6} />}
           </ExpandableCard>
 
           {/* Zyski */}
           <ExpandableCard title="Największe zyski">
-            {(exp)=> <RankingsTable category="gains" continent={continent} showCategoryTabs={false} maxRows={exp?undefined:10} />}
+            {(exp)=> <RankingsTable category="gains" continent={continent} showCategoryTabs={false} maxRows={exp?undefined:6} />}
           </ExpandableCard>
 
           {/* Straty */}
           <ExpandableCard title="Największe straty">
-            {(exp)=> <RankingsTable category="losses" continent={continent} showCategoryTabs={false} maxRows={exp?undefined:10} />}
+            {(exp)=> <RankingsTable category="losses" continent={continent} showCategoryTabs={false} maxRows={exp?undefined:6} />}
           </ExpandableCard>
 
           {/* Najwyższy */}
           <ExpandableCard title="Najwyższy kurs">
-            {(exp)=> <RankingsTable category="highest" continent={continent} showCategoryTabs={false} maxRows={exp?undefined:10} />}
+            {(exp)=> <RankingsTable category="highest" continent={continent} showCategoryTabs={false} maxRows={exp?undefined:6} />}
           </ExpandableCard>
 
           {/* Najniższy */}
           <ExpandableCard title="Najniższy kurs">
-            {(exp)=> <RankingsTable category="lowest" continent={continent} showCategoryTabs={false} maxRows={exp?undefined:10} />}
+            {(exp)=> <RankingsTable category="lowest" continent={continent} showCategoryTabs={false} maxRows={exp?undefined:6} />}
           </ExpandableCard>
         </div>
       </div>

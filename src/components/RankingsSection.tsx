@@ -27,16 +27,11 @@ export function RankingsSection(){
   useEffect(()=>{ ratesRef.current = rates; },[rates]);
 
   useEffect(() => {
-    let daily: NodeJS.Timer | undefined;
-    const initialTimeout = setTimeout(() => {
-      compute();
-      daily = setInterval(compute, 86400000);
-    }, 3000);
-
-    return () => {
-      clearTimeout(initialTimeout);
-      if (daily) clearInterval(daily);
-    };
+    // compute immediately
+    compute();
+    // schedule daily recompute
+    const daily = setInterval(compute, 86400000);
+    return () => clearInterval(daily);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

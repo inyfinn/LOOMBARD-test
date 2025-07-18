@@ -85,12 +85,11 @@ export function RankingsTable({ category: propCategory, continent: propContinent
   useEffect(() => { ratesRef.current = rates; }, [rates]);
 
   useEffect(() => {
-    let daily: NodeJS.Timer | undefined;
-    const timeout = setTimeout(() => {
-      compute();
-      daily = setInterval(compute, 86400000);
-    }, 3000);
-    return () => { clearTimeout(timeout); if (daily) clearInterval(daily); };
+    // compute immediately
+    compute();
+    // schedule daily recompute
+    const daily = setInterval(compute, 86400000);
+    return () => clearInterval(daily);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

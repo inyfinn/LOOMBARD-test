@@ -83,10 +83,20 @@ export function TopNavigation() {
   };
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' || 'light';
+    // Check if dark mode is set in HTML class
+    const isDarkMode = document.documentElement.classList.contains('dark');
+    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' || (isDarkMode ? 'dark' : 'light');
     const savedLayout = localStorage.getItem('layout') as 'mobile' | 'desktop' || 'mobile';
+    
     setTheme(savedTheme);
     setLayout(savedLayout);
+    
+    // Ensure HTML class matches the theme
+    if (savedTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
   }, []);
 
   const toggleTheme = () => {

@@ -219,10 +219,41 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   // Pobieranie aktualnych kursów przy starcie
   useEffect(() => {
     const initializeRates = async () => {
-      const currentRates = await fetchCurrentRates();
-      setRates(currentRates);
-      setRates10sAgo(currentRates); // Inicjalnie ustawiamy te same kursy
-      setLastUpdate(Date.now());
+      try {
+        console.log("Initializing rates...");
+        const currentRates = await fetchCurrentRates();
+        console.log("Rates initialized:", currentRates);
+        setRates(currentRates);
+        setRates10sAgo(currentRates); // Inicjalnie ustawiamy te same kursy
+        setLastUpdate(Date.now());
+      } catch (error) {
+        console.error("Error initializing rates:", error);
+        // Fallback rates
+        const fallbackRates = {
+          PLN: 1.0, USD: 3.92, EUR: 4.18, GBP: 4.85, CHF: 4.52, JPY: 0.026, CNY: 0.54,
+          AUD: 2.56, CAD: 2.88, NZD: 2.42, SEK: 0.39, NOK: 0.37, DKK: 0.56,
+          CZK: 0.17, HUF: 0.011, RUB: 0.043, TRY: 0.13, BRL: 0.79,
+          MXN: 0.23, ZAR: 0.21, INR: 0.047, KRW: 0.0030, SGD: 2.90, HKD: 0.50,
+          THB: 0.11, MYR: 0.83, IDR: 0.00025, PHP: 0.070, TWD: 0.12, AED: 1.07,
+          SAR: 1.05, QAR: 1.08, KWD: 12.7, BHD: 10.4, OMR: 10.2, ARS: 0.0046,
+          CLP: 0.0043, COP: 0.00097, PEN: 1.04, UYU: 0.10, VND: 0.00016,
+          EGP: 0.12, NGN: 0.0028, KES: 0.028, MAD: 0.39, TND: 1.27, BWP: 0.29,
+          GHS: 0.33, UGX: 0.0010, TZS: 0.0015, CDF: 0.0014, XAF: 0.0068,
+          XPF: 0.038, XCD: 1.44, BBD: 1.92, BMD: 3.92, BND: 2.90,
+          BIF: 0.0014, DJF: 0.022, ERN: 0.26, ETB: 0.071, FJD: 1.70, GMD: 0.064,
+          GNF: 0.00046, HTG: 0.029, IQD: 0.0030, IRR: 0.000093, ISK: 0.029,
+          JOD: 5.50, KHR: 0.00095, KMF: 0.0086, LBP: 0.0026, LKR: 0.012,
+          LRD: 0.020, LSL: 0.21, LYD: 0.80, MGA: 0.00086, MKD: 0.068, MMK: 0.0018,
+          MNT: 0.0011, MOP: 0.49, MRO: 0.010, MUR: 0.085, MVR: 0.25, MWK: 0.0023,
+          MZN: 0.061, NAD: 0.21, NPR: 0.029, PAB: 3.92, PGK: 1.09, PKR: 0.014,
+          PYG: 0.00053, RWF: 0.0031, SBD: 0.47, SCR: 0.28, SDG: 0.0065, SLL: 0.00019,
+          SOS: 0.0068, SRD: 0.12, STD: 0.00018, SVC: 0.45, SYP: 0.0015, SZL: 0.21,
+          TOP: 1.64, TTD: 0.58, VUV: 0.032, WST: 1.40, YER: 0.015, ZMW: 0.15, ZWL: 0.012
+        };
+        setRates(fallbackRates);
+        setRates10sAgo(fallbackRates);
+        setLastUpdate(Date.now());
+      }
     };
     
     initializeRates();

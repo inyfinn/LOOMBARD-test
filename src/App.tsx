@@ -12,32 +12,39 @@ import { TopNavigation } from "./components/TopNavigation";
 import { WalletProvider } from "@/context/WalletContext";
 import TransactionsPage from "@/pages/Transactions";
 import OfferPage from "./pages/Offer";
+import { useEffect } from "react";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Sonner />
-      <WalletProvider>
-        <BrowserRouter>
-          <div className="relative">
-            <TopNavigation />
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/kursy" element={<Rates />} />
-              <Route path="/transakcje" element={<TransactionsPage />} />
-              <Route path="/rankingi" element={<Rankings />} />
-              <Route path="/lokata-premium" element={<OfferPage/>} />
-              <Route path="/ustawienia" element={<Settings />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-            <BottomNav />
-          </div>
-        </BrowserRouter>
-      </WalletProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  useEffect(() => {
+    console.log("App component mounted");
+  }, []);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Sonner />
+        <WalletProvider>
+          <BrowserRouter>
+            <div className="relative min-h-screen bg-background">
+              <TopNavigation />
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/kursy" element={<Rates />} />
+                <Route path="/transakcje" element={<TransactionsPage />} />
+                <Route path="/rankingi" element={<Rankings />} />
+                <Route path="/lokata-premium" element={<OfferPage/>} />
+                <Route path="/ustawienia" element={<Settings />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+              <BottomNav />
+            </div>
+          </BrowserRouter>
+        </WalletProvider>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;

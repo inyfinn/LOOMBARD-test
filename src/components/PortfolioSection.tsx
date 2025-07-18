@@ -19,12 +19,21 @@ export function PortfolioSection() {
   const { balances, rates, rates10sAgo, isLiveMode } = useWallet();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    console.log("PortfolioSection mounted", { balances, rates, isLiveMode });
+  }, [balances, rates, isLiveMode]);
+
   const portfolioData: PortfolioItem[] = useMemo(() => {
-    return Object.entries(balances).map(([currency, balance]) => ({
-      currency,
-      balance,
-      rate: rates[currency],
-    }));
+    try {
+      return Object.entries(balances).map(([currency, balance]) => ({
+        currency,
+        balance,
+        rate: rates[currency] || 1,
+      }));
+    } catch (error) {
+      console.error("Error in portfolioData calculation:", error);
+      return [];
+    }
   }, [balances, rates]);
 
   const [animatedBalances, setAnimatedBalances] = useState<Record<string, number>>({});
@@ -69,34 +78,45 @@ export function PortfolioSection() {
   };
 
   const calculatePortfolioChange = useMemo(() => {
-    const oldRates = isLiveMode ? historicalRates24h : rates10sAgo;
-    
-    let totalValueNow = 0;
-    let totalValue24hAgo = 0;
+    try {
+      const oldRates = isLiveMode ? historicalRates24h : rates10sAgo;
+      
+      let totalValueNow = 0;
+      let totalValue24hAgo = 0;
 
-    portfolioData.forEach(({ currency, balance, rate }) => {
-      const currentValue = balance * rate;
-      totalValueNow += currentValue;
+      portfolioData.forEach(({ currency, balance, rate }) => {
+        const currentValue = balance * rate;
+        totalValueNow += currentValue;
 
-      const oldRate = oldRates[currency];
-      if (oldRate) {
-        const oldValue = balance * oldRate;
-        totalValue24hAgo += oldValue;
-      } else {
-        totalValue24hAgo += currentValue; // fallback
-      }
-    });
+        const oldRate = oldRates[currency];
+        if (oldRate) {
+          const oldValue = balance * oldRate;
+          totalValue24hAgo += oldValue;
+        } else {
+          totalValue24hAgo += currentValue; // fallback
+        }
+      });
 
-    const changeAmount = totalValueNow - totalValue24hAgo;
-    const changePercentage = totalValue24hAgo > 0 ? (changeAmount / totalValue24hAgo) * 100 : 0;
+      const changeAmount = totalValueNow - totalValue24hAgo;
+      const changePercentage = totalValue24hAgo > 0 ? (changeAmount / totalValue24hAgo) * 100 : 0;
 
-    return {
-      changeAmount,
-      changePercentage,
-      isPositive: changeAmount > 0,
-      totalValueNow,
-      totalValue24hAgo
-    };
+      return {
+        changeAmount,
+        changePercentage,
+        isPositive: changeAmount > 0,
+        totalValueNow,
+        totalValue24hAgo
+      };
+    } catch (error) {
+      console.error("Error in calculatePortfolioChange:", error);
+      return {
+        changeAmount: 0,
+        changePercentage: 0,
+        isPositive: false,
+        totalValueNow: 0,
+        totalValue24hAgo: 0
+      };
+    }
   }, [portfolioData, rates, rates10sAgo, isLiveMode]);
 
   const totalPln = portfolioData.reduce((sum,item)=> sum + (item.currency==='PLN'? item.balance : item.balance*(item.rate||0)),0);

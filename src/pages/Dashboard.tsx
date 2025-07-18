@@ -5,12 +5,17 @@ import { RankingsSection } from "@/components/RankingsSection";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useWallet } from "@/context/WalletContext";
 import { ArrowUp, ArrowDown, ArrowLeftRight } from "lucide-react";
+import { useEffect } from "react";
 
 export default function Dashboard() {
   const { transactions } = useWallet();
+  
+  useEffect(() => {
+    console.log("Dashboard component mounted");
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
-      
       <main className="container max-w-7xl mx-auto px-4 py-6 pb-20">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column - Portfolio */}

@@ -18,40 +18,65 @@ interface WalletContextValue {
 
 const initialRates: Record<string, number> = {
   PLN: 1,
-  USD: 4.0234,
-  EUR: 4.3456,
-  NOK: 0.3789,
-  SEK: 0.3654,
-  DKK: 0.5834,
-  CHF: 4.4567,
-  TRY: 0.1445,
-  ARS: 0.0112,
-  BRL: 0.8234,
-  RUB: 0.0434,
-  JPY: 0.0271,
-  GBP: 5.1234,
-  CZK: 0.1756,
+  USD: 3.6625,
+  EUR: 4.2588,
+  GBP: 4.9207,
+  INR: 0.0426,
+  AUD: 2.3838,
+  CAD: 2.6659,
+  SGD: 2.8524,
+  CHF: 4.5640,
+  MYR: 0.8629,
+  JPY: 0.0247,
+  ARS: 0.0029,
+  BHD: 9.7408,
+  BWP: 0.2635,
+  BRL: 0.6601,
+  BGN: 2.1775,
+  CLP: 0.0038,
+  CNY: 0.5101,
+  COP: 0.0009,
+  CZK: 0.1728,
+  DKK: 0.5707,
+  HKD: 0.4666,
+  HUF: 0.0107,
+  ISK: 0.0300,
+  IDR: 0.0002,
+  IRR: 0.0001,
+  ILS: 1.0896,
+  KZT: 0.0069,
+  KRW: 0.0026,
+  KWD: 11.9848,
+  LYD: 0.6754,
+  MUR: 0.0802,
+  MXN: 0.1953,
+  NPR: 0.0266,
+  NZD: 2.1831,
+  NOK: 0.3567,
+  OMR: 9.5167,
+  PKR: 0.0129,
+  PHP: 0.0641,
+  QAR: 1.0062,
+  RON: 0.8393,
+  RUB: 0.0470,
+  SAR: 0.9767,
+  ZAR: 0.2057,
+  LKR: 0.0122,
+  SEK: 0.3768,
+  TWD: 0.1245,
+  THB: 0.1130,
+  TTD: 0.5400,
+  TRY: 0.0908,
+  AED: 0.9973,
 };
-
-// Dodaj losowe waluty do liczby 100
-(() => {
-  const symbols = Object.keys(initialRates);
-  let idx = 1;
-  while (symbols.length < 100) {
-    const code = `CC${idx}`; // fikcyjny kod
-    if (!initialRates[code]) {
-      initialRates[code] = parseFloat((Math.random() * 5 + 0.1).toFixed(4));
-      symbols.push(code);
-    }
-    idx++;
-  }
-})();
 
 const WalletContext = createContext<WalletContextValue | undefined>(undefined);
 
 export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [balances, setBalances] = useState<Record<string, number>>({
-    PLN: 10000,
+    PLN: 4000,
+    EUR: 1000,
+    USD: 1000,
   });
 
   const [ratesData, setRates] = useState<Record<string, number>>(initialRates);

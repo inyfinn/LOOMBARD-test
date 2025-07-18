@@ -33,7 +33,7 @@ export const DepositDialog: React.FC<Props> = ({ open, onOpenChange }) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="w-full max-w-md top-[150px] translate-y-0 sm:top-[50%] sm:translate-y-[-50%]"
+        className="w-full max-w-md top-[10vh] translate-y-0 sm:top-[50%] sm:translate-y-[-50%]"
         onKeyDown={(e) => {
           if (e.key === "Enter") {
             e.preventDefault();
@@ -42,7 +42,7 @@ export const DepositDialog: React.FC<Props> = ({ open, onOpenChange }) => {
         }}
       >
         <DialogHeader>
-          <DialogTitle>Wpłać środki</DialogTitle>
+          <DialogTitle>Dodaj środki</DialogTitle>
           <DialogDescription>Dodaj środki do swojego portfela.</DialogDescription>
         </DialogHeader>
 
@@ -62,7 +62,7 @@ export const DepositDialog: React.FC<Props> = ({ open, onOpenChange }) => {
         </div>
 
         <DialogFooter className="mt-4">
-          <Button onClick={handle}>Wpłać</Button>
+          <Button onClick={handle}>Dodaj środki</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

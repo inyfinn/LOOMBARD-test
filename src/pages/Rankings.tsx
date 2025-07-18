@@ -28,7 +28,7 @@ export default function Rankings() {
           <div className="flex gap-2">
             {!expanded && (
               <button
-                className="flex items-center text-[10px] px-3 py-2 rounded-md border border-green-600 dark:bg-black dark:text-white dark:hover:bg-black/80 bg-white text-black hover:bg-white/80"
+                className="flex items-center text-[10px] px-3 py-2 rounded-md border-2 border-green-600 text-green-600 hover:bg-green-600/10"
                 onClick={() => setExpanded(true)}
               >
                 <ArrowDown className="h-3 w-3 mr-1" /> Rozwiń
@@ -36,7 +36,7 @@ export default function Rankings() {
             )}
             {expanded && (
               <button
-                className="flex items-center text-[10px] px-3 py-2 rounded-md border border-white text-white bg-black hover:bg-black/80"
+                className="flex items-center text-[10px] px-3 py-2 rounded-md border-2 border-white text-white hover:bg-white/10"
                 onClick={() => setExpanded(false)}
               >
                 <ArrowUp className="h-3 w-3 mr-1" /> Zwiń

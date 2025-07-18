@@ -79,7 +79,7 @@ export const ExchangeDialog: React.FC<Props> = ({ open, onOpenChange }) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="w-full max-w-md top-[150px] translate-y-0 sm:top-[50%] sm:translate-y-[-50%]"
+        className="w-full max-w-md top-[10vh] translate-y-0 sm:top-[50%] sm:translate-y-[-50%]"
         onKeyDown={(e)=>{ if(e.key==='Enter'){ e.preventDefault(); handleSubmit(); }}}
       >
         <DialogHeader>

@@ -23,14 +23,21 @@ export const WithdrawDialog: React.FC<Props> = ({ open, onOpenChange }) => {
   const handle = (all: boolean = false) => {
     const amt = all ? bal : parseFloat(amount);
     if (isNaN(amt) || amt <= 0) return;
-    // preview balance check
-    if (amt > bal) { setError("Brak środków"); return; }
+    // auto-adjust amount if too high
+    let adjustedAmount = amt;
+    if (amt > bal) {
+      adjustedAmount = bal;
+      setAmount(bal.toString());
+      setError("Brak takich środków");
+    } else {
+      setError(null);
+    }
     onOpenChange(false);
     setAmount("");
     showConfirmToast(
-      `Wypłata ${amt.toFixed(2)} ${currency}`,
+      `Wypłata ${adjustedAmount.toFixed(2)} ${currency}`,
       () => {
-        const res = withdraw(currency, amt);
+        const res = withdraw(currency, adjustedAmount);
         setError(null);
       },
       undefined
@@ -40,7 +47,7 @@ export const WithdrawDialog: React.FC<Props> = ({ open, onOpenChange }) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="w-full max-w-md top-[150px] translate-y-0 sm:top-[50%] sm:translate-y-[-50%]"
+        className="w-full max-w-md top-[10vh] translate-y-0 sm:top-[50%] sm:translate-y-[-50%]"
         onKeyDown={(e)=>{ if(e.key==='Enter'){ e.preventDefault(); handle(false); }}}
       >
         <DialogHeader>

@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TrendingUp, TrendingDown } from "lucide-react";
 import { useWallet } from "@/context/WalletContext";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 
 interface RankingItem {
   symbol: string;
@@ -20,8 +20,14 @@ const categoryConfig = {
 export function RankingsSection(){
   const { rates } = useWallet();
   const prev = useRef<Record<string, number>>(rates);
-
-  useEffect(()=>{ prev.current = rates; },[rates]);
+  const [,force]=useState(0);
+  useEffect(()=>{
+    const id=setInterval(()=>{
+      prev.current = rates;
+      force(c=>c+1); // trigger re-render
+    },86400000);
+    return ()=>clearInterval(id);
+  },[rates]);
 
   const items:RankingItem[] = Object.entries(rates).map(([code,rate])=>{
     const old = prev.current[code]??rate;

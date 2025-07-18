@@ -1,9 +1,11 @@
 import { useEffect, useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowUpDown, Wallet, ArrowRight, PiggyBank } from "lucide-react";
+import { ArrowUpDown, Wallet, ArrowRight, PiggyBank, Wallet as WalletIn } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { ExchangeDialog } from "@/components/ExchangeDialog";
+import { DepositDialog } from "@/components/DepositDialog";
+import { WithdrawDialog } from "@/components/WithdrawDialog";
 import { useWallet } from "@/context/WalletContext";
 
 interface PortfolioItem {
@@ -45,7 +47,9 @@ export function PortfolioSection() {
   const totalPln = portfolioData.reduce((sum,item)=> sum + (item.currency==='PLN'? item.balance : item.balance*(item.rate||0)),0);
   const totalUsdValue = totalPln / (rates['USD']||4);
 
-  const [open, setOpen] = useState(false);
+  const [exchangeOpen, setExchangeOpen] = useState(false);
+  const [depositOpen, setDepositOpen] = useState(false);
+  const [withdrawOpen, setWithdrawOpen] = useState(false);
 
   return (
     <div className="space-y-6">
@@ -61,14 +65,19 @@ export function PortfolioSection() {
           <div className="flex gap-3 mt-5">
             <Button
               className="bg-white text-primary hover:bg-primary/10 dark:bg-primary dark:hover:bg-primary/90 dark:text-white border border-white dark:border-transparent"
-              onClick={() => setOpen(true)}
+              onClick={() => setExchangeOpen(true)}
             >
                 <ArrowUpDown size={16} className="mr-1" />
                 Wymień
               </Button>
-            <Button variant="ghost" className="border border-primary text-primary hover:bg-white hover:text-primary dark:hover:bg-primary/10" onClick={()=>navigate('/portfel#wyp') /* placeholder*/}>
+            <Button variant="ghost" className="border border-primary text-primary hover:bg-white hover:text-primary dark:hover:bg-primary/10" onClick={()=> setWithdrawOpen(true)}>
               <PiggyBank size={16} className="mr-1" />
               Wypłać
+              </Button>
+
+             <Button variant="ghost" className="border border-primary text-primary hover:bg-white hover:text-primary dark:hover:bg-primary/10" onClick={()=> setDepositOpen(true)}>
+                <WalletIn size={16} className="mr-1" />
+                Wpłać
               </Button>
           </div>
         </CardContent>
@@ -123,7 +132,9 @@ export function PortfolioSection() {
         </div>
       )}
 
-      <ExchangeDialog open={open} onOpenChange={setOpen} />
+      <ExchangeDialog open={exchangeOpen} onOpenChange={setExchangeOpen} />
+      <DepositDialog open={depositOpen} onOpenChange={setDepositOpen} />
+      <WithdrawDialog open={withdrawOpen} onOpenChange={setWithdrawOpen} />
     </div>
   );
 }

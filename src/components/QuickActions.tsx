@@ -40,7 +40,7 @@ export function QuickActions() {
             className="h-auto p-3 flex flex-col items-center gap-2 hover:bg-accent"
             onClick={() => handleClick(label)}
           >
-          <Icon className={`${color} h-5 w-5`} />
+          <Icon className={`${color} h-7 w-7`} />
           <span className="text-xs font-medium text-center">{label}</span>
         </Button>
       ))}

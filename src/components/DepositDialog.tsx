@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { showTransactionToast } from "@/lib/txToast";
+import { showConfirmToast } from "@/lib/txToast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,9 +20,12 @@ export const DepositDialog: React.FC<Props> = ({ open, onOpenChange }) => {
   const handle = () => {
     const amt = parseFloat(amount);
     if (!isNaN(amt) && amt > 0) {
-      const tx = deposit(currency, amt);
-      showTransactionToast(tx, rollback);
-      onOpenChange(false);
+      showConfirmToast(
+        `Wpłata ${amt.toFixed(2)} ${currency}. Potwierdź`,
+        () => { deposit(currency, amt); onOpenChange(false); },
+        undefined
+      );
+      // keep dialog open until confirmed or cancelled automatically
       setAmount("");
     }
   };

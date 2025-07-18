@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { showTransactionToast } from "@/lib/txToast";
+import { showConfirmToast } from "@/lib/txToast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -56,16 +56,22 @@ export const ExchangeDialog: React.FC<Props> = ({ open, onOpenChange }) => {
   const handleSubmit = () => {
     const amt = parseFloat(fromAmount);
     if (isNaN(amt) || amt <= 0) return;
-    const res = exchange(fromCur, toCur, amt);
-    if (!res.success && res.error) {
-      setError(res.error);
-      return;
-    }
-    onOpenChange(false);
-    // clear fields
-    setFromAmount("");
-    setError(null);
-    if (res.tx) showTransactionToast(res.tx, rollback);
+    // pre-check
+    if (amt > maxBalance) { setError("Brak środków"); return; }
+    showConfirmToast(
+      `Wymiana ${amt.toFixed(2)} ${fromCur} na ${toCur}. Potwierdź`,
+      () => {
+        const res = exchange(fromCur, toCur, amt);
+        if (!res.success && res.error) {
+          setError(res.error);
+          return;
+        }
+        onOpenChange(false);
+        setFromAmount("");
+        setError(null);
+      },
+      undefined
+    );
   };
 
   const maxBalance = balances[fromCur] || 0;

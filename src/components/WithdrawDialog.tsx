@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { showTransactionToast } from "@/lib/txToast";
+import { showConfirmToast } from "@/lib/txToast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,15 +23,18 @@ export const WithdrawDialog: React.FC<Props> = ({ open, onOpenChange }) => {
   const handle = (all: boolean = false) => {
     const amt = all ? bal : parseFloat(amount);
     if (isNaN(amt) || amt <= 0) return;
-    const res = withdraw(currency, amt);
-    if (!res.success) {
-      setError(res.error || "");
-      return;
-    }
-    setError(null);
-    onOpenChange(false);
-    setAmount("");
-    if (res.tx) showTransactionToast(res.tx, rollback);
+    // preview balance check
+    if (amt > bal) { setError("Brak środków"); return; }
+    showConfirmToast(
+      `Wypłata ${amt.toFixed(2)} ${currency}. Potwierdź`,
+      () => {
+        const res = withdraw(currency, amt);
+        setError(null);
+        onOpenChange(false);
+        setAmount("");
+      },
+      undefined
+    );
   };
 
   return (

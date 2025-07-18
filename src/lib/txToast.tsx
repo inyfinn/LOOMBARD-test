@@ -1,14 +1,12 @@
 import { toast } from "@/components/ui/sonner";
 import { Button } from "@/components/ui/button";
-import { Transaction } from "@/context/WalletContext";
 import { useEffect, useState } from "react";
 
-export function showTransactionToast(
-  tx: Transaction | null | undefined,
-  rollback: (tx: Transaction) => void
+export function showConfirmToast(
+  message: string,
+  onConfirm: () => void,
+  onCancel?: () => void
 ) {
-  if (!tx) return;
-
   const CountdownToast: React.FC<{ toastId: number }> = ({ toastId }) => {
     const [remaining, setRemaining] = useState<number>(15);
     const [shake, setShake] = useState(false);
@@ -23,54 +21,64 @@ export function showTransactionToast(
     useEffect(() => {
       const t = setTimeout(() => {
         setShake(true);
-        setTimeout(() => setShake(false), 500); // reset
+        setTimeout(() => setShake(false), 500);
       }, 5000);
       return () => clearTimeout(t);
     }, []);
 
     useEffect(() => {
       if (remaining <= 0) {
-        rollback(tx!);
+        onCancel?.();
         toast.dismiss(toastId);
       }
     }, [remaining]);
 
     return (
       <div
-        className={`flex flex-col items-center p-7 space-y-4 animate-in slide-in-from-top rounded-md bg-background shadow-lg border border-green-600 ${shake ? 'shake' : ''}`}
+        className={`flex flex-col items-center p-7 space-y-4 rounded-md bg-background shadow-lg border border-green-600 ${shake ? 'shake' : ''}`}
         style={{
           width: typeof window !== 'undefined' && window.innerWidth < 640 ? 'calc(100vw - 60px)' : 'auto',
-          marginTop: typeof window !== 'undefined' && window.innerWidth >= 640 ? '20vh' : undefined,
-          paddingLeft: typeof window !== 'undefined' && window.innerWidth >= 640 ? 50 + 28 : undefined,
-          paddingRight: typeof window !== 'undefined' && window.innerWidth >= 640 ? 50 + 28 : undefined,
-          paddingTop: typeof window !== 'undefined' && window.innerWidth >= 640 ? 30 + 28 : undefined,
-          paddingBottom: 28,
+          position:'relative',left:'50%',transform:'translateX(-50%)',
+          marginTop: typeof window !== 'undefined' && window.innerWidth >= 1024 ? '20vh' : undefined,
+          paddingLeft: typeof window !== 'undefined' && window.innerWidth >= 1024 ? 68 : undefined,
+          paddingRight: typeof window !== 'undefined' && window.innerWidth >= 1024 ? 68 : undefined,
+          paddingTop: typeof window !== 'undefined' && window.innerWidth >= 1024 ? 58 : undefined,
         }}
       >
-        <p className="text-sm font-medium text-center">Transakcja oczekuje potwierdzenia</p>
+        <p className="font-medium text-center" style={{fontSize: typeof window!=='undefined' && window.innerWidth>=1024? '1.125rem':'1rem'}}>{message}</p>
         <div className="flex gap-2">
-          <Button size="sm" onClick={() => toast.dismiss(toastId)}>
+          <Button
+            size="sm"
+            onClick={() => {
+              onConfirm();
+              toast.dismiss(toastId);
+            }}
+          >
             Potwierdź
           </Button>
           <Button
             size="sm"
             variant="outline"
             onClick={() => {
-              rollback(tx!);
+              onCancel?.();
               toast.dismiss(toastId);
             }}
           >
             Cofnij
           </Button>
         </div>
-        <p className="text-xs text-muted-foreground text-center">Brak potwierdzenia za {remaining}s</p>
+        <p
+          className={`text-xs text-center ${remaining<=5? 'text-red-600':'text-muted-foreground'}`}
+        >
+          Brak potwierdzenia za {remaining}s
+        </p>
       </div>
     );
   };
 
-  const id = toast.custom((t) => <CountdownToast toastId={t.id} />, {
+  toast.custom((t) => <CountdownToast toastId={t.id} />, {
     position: "top-center",
     duration: 15000,
-    className: "!p-0", // padding handled inside
+    className: "!p-0",
   });
 } 

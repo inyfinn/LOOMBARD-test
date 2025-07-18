@@ -80,20 +80,31 @@ export function RankingsTable({ category: propCategory, continent: propContinent
   const [tab, setTab] = useState<string>(propCategory || "gains");
   const [continent, setContinent] = useState<string>(propContinent || "All");
 
-  useEffect(() => {
-    const now = Date.now();
-    if (now - lastComputeTs.current < 86400000 && lastComputeTs.current !== 0) return;
+  const ratesRef = useRef(rates);
+  useEffect(() => { ratesRef.current = rates; }, [rates]);
 
-    const list: Row[] = Object.entries(rates).map(([symbol, rate]) => {
+  useEffect(() => {
+    let daily: NodeJS.Timer | undefined;
+    const timeout = setTimeout(() => {
+      compute();
+      daily = setInterval(compute, 86400000);
+    }, 3000);
+    return () => { clearTimeout(timeout); if (daily) clearInterval(daily); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const compute = () => {
+    const now = Date.now();
+    if (now - lastComputeTs.current < 1000) return; // prevent double
+    const list: Row[] = Object.entries(ratesRef.current).map(([symbol, rate]) => {
       const old = snapshot.current[symbol] ?? rate;
       const change = ((rate - old) / old) * 100;
       return { symbol, name: symbol, rate: parseFloat(rate.toFixed(4)), change };
     });
     setRows(list);
-
-    snapshot.current = rates;
+    snapshot.current = ratesRef.current;
     lastComputeTs.current = now;
-  }, [rates]);
+  };
 
   const categories: Record<
     string,

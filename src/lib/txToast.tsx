@@ -11,12 +11,21 @@ export function showTransactionToast(
 
   const CountdownToast: React.FC<{ toastId: number }> = ({ toastId }) => {
     const [remaining, setRemaining] = useState<number>(15);
+    const [shake, setShake] = useState(false);
 
     useEffect(() => {
       const iv = setInterval(() => {
         setRemaining((r) => r - 1);
       }, 1000);
       return () => clearInterval(iv);
+    }, []);
+
+    useEffect(() => {
+      const t = setTimeout(() => {
+        setShake(true);
+        setTimeout(() => setShake(false), 500); // reset
+      }, 5000);
+      return () => clearTimeout(t);
     }, []);
 
     useEffect(() => {
@@ -27,7 +36,17 @@ export function showTransactionToast(
     }, [remaining]);
 
     return (
-      <div className="flex flex-col items-center w-full p-7 space-y-4 animate-in slide-in-from-top rounded-md bg-background shadow-lg">
+      <div
+        className={`flex flex-col items-center p-7 space-y-4 animate-in slide-in-from-top rounded-md bg-background shadow-lg border border-green-600 ${shake ? 'shake' : ''}`}
+        style={{
+          width: typeof window !== 'undefined' && window.innerWidth < 640 ? 'calc(100vw - 60px)' : 'auto',
+          marginTop: typeof window !== 'undefined' && window.innerWidth >= 640 ? '20vh' : undefined,
+          paddingLeft: typeof window !== 'undefined' && window.innerWidth >= 640 ? 50 + 28 : undefined,
+          paddingRight: typeof window !== 'undefined' && window.innerWidth >= 640 ? 50 + 28 : undefined,
+          paddingTop: typeof window !== 'undefined' && window.innerWidth >= 640 ? 30 + 28 : undefined,
+          paddingBottom: 28,
+        }}
+      >
         <p className="text-sm font-medium text-center">Transakcja oczekuje potwierdzenia</p>
         <div className="flex gap-2">
           <Button size="sm" onClick={() => toast.dismiss(toastId)}>

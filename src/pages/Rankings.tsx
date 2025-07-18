@@ -1,6 +1,7 @@
 import { RankingsTable } from "@/components/RankingsTable";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState } from "react";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 export default function Rankings() {
   const continents = [
@@ -36,37 +37,54 @@ export default function Rankings() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Wszystkie - full width */}
-          <div className="md:col-span-2">
-            <RankingsTable
-              category="all"
-              continent={continent}
-              showCategoryTabs={false}
-            />
-          </div>
+          <Card className="md:col-span-2">
+            <CardHeader>
+              <CardTitle>Wszystkie</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <RankingsTable category="all" continent={continent} showCategoryTabs={false} />
+            </CardContent>
+          </Card>
 
-          {/* Zyski & Straty */}
-          <RankingsTable
-            category="gains"
-            continent={continent}
-            showCategoryTabs={false}
-          />
-          <RankingsTable
-            category="losses"
-            continent={continent}
-            showCategoryTabs={false}
-          />
+          {/* Zyski */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Największe zyski</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <RankingsTable category="gains" continent={continent} showCategoryTabs={false} />
+            </CardContent>
+          </Card>
 
-          {/* Najwyższy / Najniższy */}
-          <RankingsTable
-            category="highest"
-            continent={continent}
-            showCategoryTabs={false}
-          />
-          <RankingsTable
-            category="lowest"
-            continent={continent}
-            showCategoryTabs={false}
-          />
+          {/* Straty */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Największe straty</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <RankingsTable category="losses" continent={continent} showCategoryTabs={false} />
+            </CardContent>
+          </Card>
+
+          {/* Najwyższy */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Najwyższy kurs</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <RankingsTable category="highest" continent={continent} showCategoryTabs={false} />
+            </CardContent>
+          </Card>
+
+          {/* Najniższy */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Najniższy kurs</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <RankingsTable category="lowest" continent={continent} showCategoryTabs={false} />
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>

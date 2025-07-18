@@ -1,4 +1,4 @@
-import { RankingsSection } from "@/components/RankingsSection";
+import { RankingsTable } from "@/components/RankingsTable";
 
 export default function Rankings(){
   return (
@@ -6,9 +6,9 @@ export default function Rankings(){
       <div className="container max-w-lg mx-auto px-4 space-y-4">
         <div className="text-center">
           <h1 className="text-2xl font-bold">Rankingi 24h</h1>
-          <p className="text-muted-foreground">Top 5 wzrostów i spadków</p>
+          <p className="text-muted-foreground">Obszerna lista z podziałem na kategorie</p>
         </div>
-        <RankingsSection />
+        <RankingsTable />
       </div>
     </div>
   );

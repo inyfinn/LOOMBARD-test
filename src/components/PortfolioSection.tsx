@@ -26,16 +26,14 @@ export function PortfolioSection() {
 
   const [animatedBalances, setAnimatedBalances] = useState<Record<string, number>>({});
 
+  // animate on balances change
   useEffect(() => {
     portfolioData.forEach((item, index) => {
       setTimeout(() => {
-        setAnimatedBalances(prev => ({
-          ...prev,
-          [item.currency]: item.balance
-        }));
-      }, index * 150);
+        setAnimatedBalances(prev => ({ ...prev, [item.currency]: item.balance }));
+      }, index * 80);
     });
-  }, []);
+  }, [portfolioData]);
 
   const formatCurrency = (amount: number, currency: string) => {
     return new Intl.NumberFormat('pl-PL', {
@@ -44,33 +42,31 @@ export function PortfolioSection() {
     }).format(amount) + ` ${currency}`;
   };
 
-  const totalUsdValue = portfolioData.reduce((total, item) => {
-    const plnValue = item.currency === 'PLN' ? item.balance : item.balance * (item.rate || 0);
-    return total + plnValue / (rates['USD'] || 4);
-  }, 0);
+  const totalPln = portfolioData.reduce((sum,item)=> sum + (item.currency==='PLN'? item.balance : item.balance*(item.rate||0)),0);
+  const totalUsdValue = totalPln / (rates['USD']||4);
 
   const [open, setOpen] = useState(false);
 
   return (
     <div className="space-y-6">
       {/* Main Balance Display */}
-      <Card className="bg-primary text-white dark:bg-card dark:text-primary border-transparent dark:border border-primary">
+      <Card className="bg-primary text-white dark:bg-card dark:text-primary border border-primary">
         <CardContent className="p-6">
-          <p className="text-sm mb-1">Całkowite saldo</p>
+          <p className="text-sm mb-1 text-white dark:text-white">Całkowite saldo</p>
           <h2 className="text-4xl font-bold text-white">
-                {formatCurrency(animatedBalances['PLN'] || 0, 'PLN')}
+                {formatCurrency(totalPln, 'PLN')}
               </h2>
-          <p className="text-primary/70 text-sm mb-5">≈ ${totalUsdValue.toFixed(2)} USD</p>
+          <p className="text-white/80 dark:text-primary/80 text-sm mb-5">≈ ${totalUsdValue.toFixed(2)} USD</p>
 
           <div className="flex gap-3 mt-5">
             <Button
-              className="bg-white/20 hover:bg-white/30 text-white dark:bg-primary dark:hover:bg-primary/90"
+              className="bg-white text-primary hover:bg-primary/10 dark:bg-primary dark:hover:bg-primary/90 dark:text-white border border-white dark:border-transparent"
               onClick={() => setOpen(true)}
             >
                 <ArrowUpDown size={16} className="mr-1" />
                 Wymień
               </Button>
-            <Button variant="ghost" className="border border-white text-white hover:bg-white/10 dark:border-primary dark:text-primary dark:hover:bg-primary/10" onClick={()=>{/* open withdraw */}}>
+            <Button variant="ghost" className="border border-primary text-primary hover:bg-white hover:text-primary dark:hover:bg-primary/10" onClick={()=>navigate('/portfel#wyp') /* placeholder*/}>
               <PiggyBank size={16} className="mr-1" />
               Wypłać
               </Button>

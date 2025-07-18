@@ -7,10 +7,10 @@ import Index from "./pages/Index";
 import Rates from "./pages/Rates";
 import Rankings from "./pages/Rankings";
 import Settings from "./pages/Settings";
-import WalletPage from "./pages/Wallet";
 import NotFound from "./pages/NotFound";
 import { BottomNav } from "./components/BottomNav";
 import { WalletProvider } from "@/context/WalletContext";
+import TransactionsPage from "./pages/Transactions";
 
 const queryClient = new QueryClient();
 
@@ -25,7 +25,7 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/kursy" element={<Rates />} />
-              <Route path="/portfel" element={<WalletPage />} />
+              <Route path="/transakcje" element={<TransactionsPage />} />
               <Route path="/rankingi" element={<Rankings />} />
               <Route path="/ustawienia" element={<Settings />} />
               <Route path="*" element={<NotFound />} />

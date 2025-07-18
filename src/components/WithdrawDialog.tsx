@@ -12,7 +12,7 @@ interface Props {
 
 export const WithdrawDialog: React.FC<Props> = ({ open, onOpenChange }) => {
   const { withdraw, balances, rates } = useWallet();
-  const currencyList = Object.keys(rates);
+  const currencyList = Object.keys(balances).filter(c=>balances[c]>0);
   const [currency, setCurrency] = useState("PLN");
   const [amount, setAmount] = useState("");
   const [error, setError] = useState<string | null>(null);

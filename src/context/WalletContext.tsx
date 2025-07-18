@@ -40,9 +40,11 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   const [ratesData, setRates] = useState<Record<string, number>>(initialRates);
 
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const sampleTx: Transaction[] = Array.from({length:15}).map((_,i)=>({type:"deposit",currency:"PLN",amount:50*i+10,timestamp:Date.now()-i*3600*1000}));
 
-  // Mock rate update every 30s ➜ ±0.5% random drift
+  const [transactions, setTransactions] = useState<Transaction[]>(sampleTx);
+
+  // Mock rate update every 1s ➜ ±0.5% random drift
   useEffect(() => {
     const id = setInterval(() => {
       setBalances((prev) => ({ ...prev })); // trigger dependents
@@ -55,7 +57,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         next["PLN"] = 1;
         return next;
       });
-    }, 30000);
+    }, 1000);
     return () => clearInterval(id);
   }, []);
 

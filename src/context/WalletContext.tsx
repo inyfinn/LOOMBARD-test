@@ -298,11 +298,6 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   const [lastTransaction, setLastTransaction] = useState<Transaction | null>(null);
   const [isLiveMode, setIsLiveMode] = useState(false);
 
-  // Aktualizuj ref gdy rates się zmienia
-  useEffect(() => {
-    ratesRef.current = rates;
-  }, [rates]);
-
   // Pobieranie aktualnych kursów przy starcie
   useEffect(() => {
     const initializeRates = async () => {
@@ -312,6 +307,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         console.log("Rates initialized:", currentRates);
         setRates(currentRates);
         setRates10sAgo(currentRates); // Inicjalnie ustawiamy te same kursy
+        ratesRef.current = currentRates; // Aktualizuj ref
         setLastUpdate(Date.now());
       } catch (error) {
         console.error("Error initializing rates:", error);
@@ -339,6 +335,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         };
         setRates(fallbackRates);
         setRates10sAgo(fallbackRates);
+        ratesRef.current = fallbackRates; // Aktualizuj ref
         setLastUpdate(Date.now());
       }
     };
@@ -357,6 +354,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
       interval = setInterval(async () => {
         const currentRates = await fetchCurrentRates();
         setRates(currentRates);
+        ratesRef.current = currentRates; // Aktualizuj ref
         setLastUpdate(Date.now());
       }, 30000);
     } else {
@@ -371,6 +369,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
               newRates[currency] = generateTestFluctuation(rate);
             }
           });
+          ratesRef.current = newRates; // Aktualizuj ref
           return newRates;
         });
         setLastUpdate(Date.now());
@@ -378,17 +377,11 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 
       // Snapshot co 10 sekund dla trybu testowego
       snapshotInterval = setInterval(() => {
-        setRates10sAgo(prevRates => {
-          // Użyj funkcji callback żeby dostać aktualny stan rates
-          setRates(currentRates => {
-            if (Object.keys(currentRates).length > 0) {
-              console.log("Taking snapshot of rates:", currentRates);
-              return currentRates;
-            }
-            return currentRates;
-          });
-          return prevRates;
-        });
+        const currentRates = ratesRef.current;
+        if (Object.keys(currentRates).length > 0) {
+          console.log("Taking snapshot of rates:", currentRates);
+          setRates10sAgo({ ...currentRates });
+        }
       }, 10000);
 
       // Aktualizacja portfolio co 10 sekund w trybie testowym

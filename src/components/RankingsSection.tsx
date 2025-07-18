@@ -92,11 +92,22 @@ export function RankingsSection(){
     const currentRates = ratesRef.current;
     const oldRates = isLiveMode ? historicalRates24h : rates10sAgo;
     
-    console.log("Computing rankings:", { isLiveMode, currentRates, oldRates });
+    console.log("Computing rankings:", { 
+      isLiveMode, 
+      currentRatesKeys: Object.keys(currentRates), 
+      oldRatesKeys: Object.keys(oldRates),
+      currentRatesSample: Object.entries(currentRates).slice(0, 3),
+      oldRatesSample: Object.entries(oldRates).slice(0, 3)
+    });
     
     // Sprawdź czy mamy dane do porównania
-    if (Object.keys(currentRates).length === 0 || Object.keys(oldRates).length === 0) {
-      console.log("No rates data available yet");
+    if (Object.keys(currentRates).length === 0) {
+      console.log("No current rates data available");
+      return;
+    }
+    
+    if (Object.keys(oldRates).length === 0) {
+      console.log("No old rates data available");
       return;
     }
     
@@ -120,10 +131,26 @@ export function RankingsSection(){
     const gains = changes.filter(item => item.change > 0).slice(0, 3);
     const losses = changes.filter(item => item.change < 0).slice(0, 3);
 
-    console.log("Rankings computed:", { gains, losses });
+    console.log("Rankings computed:", { 
+      gains: gains.map(g => ({ code: g.code, change: g.change.toFixed(4) })), 
+      losses: losses.map(l => ({ code: l.code, change: l.change.toFixed(4) }))
+    });
 
     // Fallback jeśli brak zmian - pokazujemy top/bottom według kursu
-    if (gains.length === 0) {
+    if (gains.length === 0 && losses.length === 0) {
+      console.log("No changes detected, showing top/bottom by rate");
+      const topByRate = Object.entries(currentRates)
+        .filter(([code]) => code !== 'PLN')
+        .sort(([, a], [, b]) => b - a)
+        .slice(0, 3)
+        .map(([code, rate]) => ({ code, change: 0, rate }));
+      const bottomByRate = Object.entries(currentRates)
+        .filter(([code]) => code !== 'PLN')
+        .sort(([, a], [, b]) => a - b)
+        .slice(0, 3)
+        .map(([code, rate]) => ({ code, change: 0, rate }));
+      setGroupedData({ gains: topByRate, losses: bottomByRate });
+    } else if (gains.length === 0) {
       const topByRate = Object.entries(currentRates)
         .filter(([code]) => code !== 'PLN')
         .sort(([, a], [, b]) => b - a)

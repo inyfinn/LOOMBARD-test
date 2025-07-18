@@ -18,10 +18,21 @@ interface PortfolioItem {
 export function PortfolioSection() {
   const { balances, rates, rates10sAgo, isLiveMode, lastUpdate } = useWallet();
   const navigate = useNavigate();
+  const [portfolioUpdateTrigger, setPortfolioUpdateTrigger] = useState(0);
 
   useEffect(() => {
     console.log("PortfolioSection mounted", { balances, rates, isLiveMode });
   }, [balances, rates, isLiveMode]);
+
+  // Aktualizacja portfolio co 10 sekund w trybie testowym
+  useEffect(() => {
+    if (!isLiveMode) {
+      const interval = setInterval(() => {
+        setPortfolioUpdateTrigger(prev => prev + 1);
+      }, 10000);
+      return () => clearInterval(interval);
+    }
+  }, [isLiveMode]);
 
   const portfolioData: PortfolioItem[] = useMemo(() => {
     try {
@@ -117,7 +128,7 @@ export function PortfolioSection() {
         totalValue24hAgo: 0
       };
     }
-  }, [portfolioData, rates, rates10sAgo, isLiveMode, lastUpdate]); // Added lastUpdate dependency
+  }, [portfolioData, rates, rates10sAgo, isLiveMode, lastUpdate, portfolioUpdateTrigger]); // Added portfolioUpdateTrigger dependency
 
   const totalPln = portfolioData.reduce((sum,item)=> sum + (item.currency==='PLN'? item.balance : item.balance*(item.rate||0)),0);
   const totalUsdValue = totalPln / (rates['USD']||4);

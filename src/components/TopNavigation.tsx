@@ -1,4 +1,4 @@
-import { Search, Bell, User, Moon, Sun, Monitor, Smartphone } from "lucide-react";
+import { Search, Bell, User, Moon, Sun, Monitor, Smartphone, Radio } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState, useEffect } from "react";
@@ -64,7 +64,7 @@ const aliasMap: Record<string,string> = {
 export function TopNavigation() {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [layout, setLayout] = useState<'mobile' | 'desktop'>('mobile');
-  const { rates } = useWallet();
+  const { rates, isLiveMode, toggleLiveMode } = useWallet();
   const [query,setQuery]=useState("");
 
   const handleSearch=()=>{
@@ -149,6 +149,22 @@ export function TopNavigation() {
 
           <Button variant="ghost" size="sm" className="hidden md:flex">
             <Bell size={18} />
+          </Button>
+
+          {/* Live Mode Toggle */}
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={toggleLiveMode}
+            className={`border border-green-500 text-green-600 hover:bg-green-50 dark:hover:bg-green-950/20 ${
+              isLiveMode ? 'bg-green-50 dark:bg-green-950/20' : 'bg-transparent'
+            }`}
+            title={isLiveMode ? "Tryb na żywo" : "Tryb testowy"}
+          >
+            <Radio size={18} className="mr-1" />
+            <span className="text-xs font-medium">
+              {isLiveMode ? "na żywo" : "testowy"}
+            </span>
           </Button>
 
           <Button asChild variant="ghost" size="sm">

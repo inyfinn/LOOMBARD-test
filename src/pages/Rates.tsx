@@ -19,7 +19,7 @@ export default function Rates() {
   const [sortBy, setSortBy] = useState<"name" | "rate" | "change">("name");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
 
-  const { rates } = useWallet();
+  const { rates, isLiveMode } = useWallet();
   const prev = useRef(rates);
   const [data,setData]=useState<CurrencyRate[]>([]);
 
@@ -63,104 +63,115 @@ export default function Rates() {
     }
   };
 
+  const formatChange = (change: number) => {
+    const isPositive = change > 0;
+    return (
+      <Badge variant={isPositive ? "default" : "destructive"} className="flex items-center gap-1">
+        {isPositive ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+        {isPositive ? '+' : ''}{change.toFixed(2)}%
+      </Badge>
+    );
+  };
+
   return (
-    <div className="min-h-screen bg-background pb-20 pt-4">
-      <div className="container max-w-md mx-auto px-4 space-y-4">
-        {/* Header */}
-        <div className="text-center">
-          <h1 className="text-2xl font-bold">Kursy walut</h1>
-          <p className="text-muted-foreground">Aktualne kursy wymiany</p>
+    <div className="container mx-auto px-4 py-6 space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h1 className="text-3xl font-bold">Kursy walut</h1>
+          <p className="text-muted-foreground">
+            {isLiveMode ? "Aktualizowane na żywo co 30 sekund" : "Aktualizowane na żywo co pół sekundy"}
+          </p>
         </div>
-
-        {/* Search */}
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-          <Input
-            placeholder="Szukaj waluty..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
+        
+        <div className="flex items-center gap-2">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={18} />
+            <Input
+              placeholder="Szukaj walut..."
+              className="pl-10 w-64"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
         </div>
-
-        {/* Sort buttons */}
-        <div className="flex gap-2 overflow-x-auto pb-2">
-          <Button
-            variant={sortBy === "name" ? "default" : "outline"}
-            size="sm"
-            onClick={() => toggleSort("name")}
-          >
-            Nazwa {sortBy === "name" && (sortOrder === "asc" ? "↑" : "↓")}
-          </Button>
-          <Button
-            variant={sortBy === "rate" ? "default" : "outline"}
-            size="sm"
-            onClick={() => toggleSort("rate")}
-          >
-            Kurs {sortBy === "rate" && (sortOrder === "asc" ? "↑" : "↓")}
-          </Button>
-          <Button
-            variant={sortBy === "change" ? "default" : "outline"}
-            size="sm"
-            onClick={() => toggleSort("change")}
-          >
-            Zmiana {sortBy === "change" && (sortOrder === "asc" ? "↑" : "↓")}
-          </Button>
-        </div>
-
-        {/* Currency list */}
-        <div className="space-y-2">
-          {filteredAndSortedRates.map((rate) => {
-            const isPositive = rate.change > 0;
-            return (
-              <Card key={rate.code} className="cursor-pointer hover:bg-accent transition-colors">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                        <span className="font-bold text-primary">{rate.code}</span>
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <p className="font-medium">{rate.code}</p>
-                          {rate.isFavorite && <Star className="h-4 w-4 text-yellow-500 fill-current" />}
-                        </div>
-                        <p className="text-sm text-muted-foreground">{rate.name}</p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-medium">{rate.rate.toFixed(4)} PLN</p>
-                      <Badge 
-                        variant={isPositive ? "default" : "destructive"}
-                        className="flex items-center gap-1"
-                      >
-                        {isPositive ? (
-                          <TrendingUp className="h-3 w-3" />
-                        ) : (
-                          <TrendingDown className="h-3 w-3" />
-                        )}
-                        {Math.abs(rate.change).toFixed(2)}%
-                      </Badge>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-
-        {/* Update info */}
-        <Card>
-          <CardContent className="p-4 text-center">
-            <p className="text-sm text-muted-foreground">
-              Ostatnia aktualizacja: dzisiaj, 15:30
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">
-              Kursy aktualizowane są na bieżąco, co pół sekundy
-            </p>
-          </CardContent>
-        </Card>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Wszystkie kursy</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-border">
+                  <th className="text-left py-3 px-4 font-medium">
+                    <Button
+                      variant="ghost"
+                      onClick={() => toggleSort("name")}
+                      className="h-auto p-0 font-medium hover:bg-transparent"
+                    >
+                      Waluta
+                      {sortBy === "name" && (
+                        <span className="ml-1">{sortOrder === "asc" ? "↑" : "↓"}</span>
+                      )}
+                    </Button>
+                  </th>
+                  <th className="text-right py-3 px-4 font-medium">
+                    <Button
+                      variant="ghost"
+                      onClick={() => toggleSort("rate")}
+                      className="h-auto p-0 font-medium hover:bg-transparent"
+                    >
+                      Kurs
+                      {sortBy === "rate" && (
+                        <span className="ml-1">{sortOrder === "asc" ? "↑" : "↓"}</span>
+                      )}
+                    </Button>
+                  </th>
+                  <th className="text-right py-3 px-4 font-medium">
+                    <Button
+                      variant="ghost"
+                      onClick={() => toggleSort("change")}
+                      className="h-auto p-0 font-medium hover:bg-transparent"
+                    >
+                      Zmiana
+                      {sortBy === "change" && (
+                        <span className="ml-1">{sortOrder === "asc" ? "↑" : "↓"}</span>
+                      )}
+                    </Button>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredAndSortedRates.map((rate) => (
+                  <tr key={rate.code} className="border-b border-border hover:bg-muted/50">
+                    <td className="py-3 px-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                          <span className="text-xs font-bold text-primary">
+                            {rate.code.slice(0, 2)}
+                          </span>
+                        </div>
+                        <div>
+                          <p className="font-medium">{rate.code}/PLN</p>
+                          <p className="text-sm text-muted-foreground">{rate.name}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="py-3 px-4 text-right">
+                      <p className="font-medium">{rate.rate.toFixed(4)}</p>
+                    </td>
+                    <td className="py-3 px-4 text-right">
+                      {formatChange(rate.change)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

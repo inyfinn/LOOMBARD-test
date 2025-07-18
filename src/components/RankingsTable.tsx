@@ -67,9 +67,10 @@ interface Props {
   category?: string; // "gains" | "losses" | "highest" | "lowest" | "all"
   continent?: string;
   showCategoryTabs?: boolean;
+  maxRows?: number; // if provided, slice rows
 }
 
-export function RankingsTable({ category: propCategory, continent: propContinent, showCategoryTabs = true }: Props) {
+export function RankingsTable({ category: propCategory, continent: propContinent, showCategoryTabs = true, maxRows }: Props) {
   const { rates } = useWallet();
   const snapshot = useRef<Record<string, number>>(rates);
   const lastComputeTs = useRef<number>(0);
@@ -149,7 +150,11 @@ export function RankingsTable({ category: propCategory, continent: propContinent
     return (a.change - b.change) * dirMult;
   };
 
-  const sorted = [...filtered].sort(applySort);
+  let sorted = [...filtered].sort(applySort);
+
+  if (maxRows && sorted.length > maxRows) {
+    sorted = sorted.slice(0, maxRows);
+  }
 
   const toggleSort = (col: SortCol) => {
     if (sortCol === col) {

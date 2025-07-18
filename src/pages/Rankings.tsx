@@ -2,6 +2,8 @@ import { RankingsTable } from "@/components/RankingsTable";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { ArrowDown, ArrowUp } from "lucide-react";
+import React from "react";
 
 export default function Rankings() {
   const continents = [
@@ -16,6 +18,36 @@ export default function Rankings() {
   ];
 
   const [continent, setContinent] = useState<string>("All");
+
+  const ExpandableCard: React.FC<{ title: string; children: (expanded:boolean)=>React.ReactNode }> = ({ title, children }) => {
+    const [expanded, setExpanded] = React.useState(false);
+    return (
+      <Card className={`${title==='Wszystkie' ? 'md:col-span-2':''}`}>
+        <CardHeader className="flex flex-row items-center justify-between py-4 px-4">
+          <CardTitle>{title}</CardTitle>
+          <div className="flex gap-2">
+            <button
+              className={`flex items-center text-[14px] px-3 py-2 rounded-md bg-muted hover:bg-muted/80 disabled:opacity-50`}
+              disabled={expanded}
+              onClick={() => setExpanded(true)}
+            >
+              <ArrowDown className="h-4 w-4 mr-1" /> pokaż wszystko
+            </button>
+            <button
+              className={`flex items-center text-[14px] px-3 py-2 rounded-md bg-red-600 text-white hover:bg-red-700 disabled:opacity-50`}
+              disabled={!expanded}
+              onClick={() => setExpanded(false)}
+            >
+              <ArrowUp className="h-4 w-4 mr-1" /> zwiń
+            </button>
+          </div>
+        </CardHeader>
+        <CardContent className="p-0">
+          {children(expanded)}
+        </CardContent>
+      </Card>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-background pb-20 pt-4">
@@ -36,55 +68,29 @@ export default function Rankings() {
         </Tabs>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Wszystkie - full width */}
-          <Card className="md:col-span-2">
-            <CardHeader>
-              <CardTitle>Wszystkie</CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-              <RankingsTable category="all" continent={continent} showCategoryTabs={false} />
-            </CardContent>
-          </Card>
+          <ExpandableCard title="Wszystkie">
+            {(exp)=> <RankingsTable category="all" continent={continent} showCategoryTabs={false} maxRows={exp?undefined:10} />}
+          </ExpandableCard>
 
           {/* Zyski */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Największe zyski</CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-              <RankingsTable category="gains" continent={continent} showCategoryTabs={false} />
-            </CardContent>
-          </Card>
+          <ExpandableCard title="Największe zyski">
+            {(exp)=> <RankingsTable category="gains" continent={continent} showCategoryTabs={false} maxRows={exp?undefined:10} />}
+          </ExpandableCard>
 
           {/* Straty */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Największe straty</CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-              <RankingsTable category="losses" continent={continent} showCategoryTabs={false} />
-            </CardContent>
-          </Card>
+          <ExpandableCard title="Największe straty">
+            {(exp)=> <RankingsTable category="losses" continent={continent} showCategoryTabs={false} maxRows={exp?undefined:10} />}
+          </ExpandableCard>
 
           {/* Najwyższy */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Najwyższy kurs</CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-              <RankingsTable category="highest" continent={continent} showCategoryTabs={false} />
-            </CardContent>
-          </Card>
+          <ExpandableCard title="Najwyższy kurs">
+            {(exp)=> <RankingsTable category="highest" continent={continent} showCategoryTabs={false} maxRows={exp?undefined:10} />}
+          </ExpandableCard>
 
           {/* Najniższy */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Najniższy kurs</CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-              <RankingsTable category="lowest" continent={continent} showCategoryTabs={false} />
-            </CardContent>
-          </Card>
+          <ExpandableCard title="Najniższy kurs">
+            {(exp)=> <RankingsTable category="lowest" continent={continent} showCategoryTabs={false} maxRows={exp?undefined:10} />}
+          </ExpandableCard>
         </div>
       </div>
     </div>

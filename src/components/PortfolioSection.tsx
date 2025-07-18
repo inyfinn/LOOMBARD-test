@@ -7,6 +7,7 @@ import { ExchangeDialog } from "@/components/ExchangeDialog";
 import { DepositDialog } from "@/components/DepositDialog";
 import { WithdrawDialog } from "@/components/WithdrawDialog";
 import { useWallet } from "@/context/WalletContext";
+import { toast } from "@/hooks/use-toast";
 
 interface PortfolioItem {
   currency: string;

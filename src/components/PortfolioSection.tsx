@@ -54,7 +54,7 @@ export function PortfolioSection() {
   return (
     <div className="space-y-6">
       {/* Main Balance Display */}
-      <Card className="bg-card border border-primary text-primary">
+      <Card className="bg-primary text-white dark:bg-card dark:text-primary border-transparent dark:border border-primary">
         <CardContent className="p-6">
           <p className="text-sm mb-1">Całkowite saldo</p>
           <h2 className="text-4xl font-bold text-white">
@@ -64,13 +64,13 @@ export function PortfolioSection() {
 
           <div className="flex gap-3 mt-5">
             <Button
-              className="bg-primary hover:bg-primary/90 text-white"
+              className="bg-white/20 hover:bg-white/30 text-white dark:bg-primary dark:hover:bg-primary/90"
               onClick={() => setOpen(true)}
             >
                 <ArrowUpDown size={16} className="mr-1" />
                 Wymień
               </Button>
-            <Button variant="ghost" className="border border-primary text-primary hover:bg-primary/10" onClick={()=>{/* open withdraw */}}>
+            <Button variant="ghost" className="border border-white text-white hover:bg-white/10 dark:border-primary dark:text-primary dark:hover:bg-primary/10" onClick={()=>{/* open withdraw */}}>
               <PiggyBank size={16} className="mr-1" />
               Wypłać
               </Button>

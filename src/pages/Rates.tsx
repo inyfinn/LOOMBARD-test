@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useWallet } from "@/context/WalletContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -18,21 +19,21 @@ export default function Rates() {
   const [sortBy, setSortBy] = useState<"name" | "rate" | "change">("name");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
 
-  // Mock data - in real app would fetch from exchangerate.host
-  const [rates] = useState<CurrencyRate[]>([
-    { code: "USD", name: "Dolar amerykański", rate: 4.0234, change: -0.15, isFavorite: true },
-    { code: "EUR", name: "Euro", rate: 4.3456, change: 0.23, isFavorite: true },
-    { code: "GBP", name: "Funt brytyjski", rate: 5.1234, change: -0.08 },
-    { code: "CHF", name: "Frank szwajcarski", rate: 4.4567, change: 0.12 },
-    { code: "JPY", name: "Jen japoński", rate: 0.0271, change: -0.34 },
-    { code: "CZK", name: "Korona czeska", rate: 0.1756, change: 0.05 },
-    { code: "NOK", name: "Korona norweska", rate: 0.3789, change: -0.22 },
-    { code: "SEK", name: "Korona szwedzka", rate: 0.3654, change: 0.18 },
-    { code: "DKK", name: "Korona duńska", rate: 0.5834, change: 0.15 },
-    { code: "CAD", name: "Dolar kanadyjski", rate: 2.9876, change: -0.09 },
-  ]);
+  const { rates } = useWallet();
+  const prev = useRef(rates);
+  const [data,setData]=useState<CurrencyRate[]>([]);
 
-  const filteredAndSortedRates = rates
+  useEffect(()=>{
+    const rows = Object.entries(rates).map(([code,rate])=>{
+      const old=prev.current[code]??rate;
+      const change=((rate-old)/old)*100;
+      return {code,name:code,rate,change,isFavorite:false};
+    });
+    prev.current=rates;
+    setData(rows);
+  },[rates]);
+
+  const filteredAndSortedRates = data
     .filter(rate => 
       rate.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
       rate.name.toLowerCase().includes(searchTerm.toLowerCase())

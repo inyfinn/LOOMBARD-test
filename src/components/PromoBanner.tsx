@@ -1,25 +1,24 @@
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
+import { useWallet } from "@/context/WalletContext";
 import { Badge } from "@/components/ui/badge";
-import { Sparkles, TrendingUp, X } from "lucide-react";
-import { useState } from "react";
+import { Sparkles, TrendingUp } from "lucide-react";
 
 export function PromoBanner() {
-  const [isVisible, setIsVisible] = useState(true);
+  const navigate = useNavigate();
+  const { deposit, balances } = useWallet();
 
-  if (!isVisible) return null;
+  const handleStart=()=>{
+    const pln = balances["PLN"]||0;
+    const gain = pln*0.045;
+    deposit("PLN",parseFloat(gain.toFixed(2)));
+    alert("Zyskałeś 4,5% rocznie!");
+  };
 
   return (
     <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white relative overflow-hidden">
       <CardContent className="p-4">
-        <Button 
-          variant="ghost" 
-          size="sm"
-          className="absolute top-2 right-2 text-white/80 hover:text-white hover:bg-white/20"
-          onClick={() => setIsVisible(false)}
-        >
-          <X size={16} />
-        </Button>
         
         <div className="flex items-start gap-3">
           <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
@@ -43,10 +42,10 @@ export function PromoBanner() {
             </p>
             
             <div className="flex gap-2">
-              <Button variant="secondary" size="sm" className="bg-white text-blue-600 hover:bg-white/90">
+              <Button variant="secondary" size="sm" className="bg-white text-blue-600 hover:bg-white/90" onClick={()=>navigate('/lokata-premium')}>
                 Dowiedz się więcej
               </Button>
-              <Button variant="ghost" size="sm" className="text-white border-white/30 hover:bg-white/20">
+              <Button variant="ghost" size="sm" className="text-white border-white/30 hover:bg-white/20" onClick={handleStart}>
                 Rozpocznij
               </Button>
             </div>

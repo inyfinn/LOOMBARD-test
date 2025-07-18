@@ -113,7 +113,7 @@ export function TopNavigation() {
   };
 
   return (
-    <header className="bg-card border-b border-border px-4 py-3">
+    <header className="sticky top-0 z-50 bg-card border-b border-border px-4 py-3">
       <div className="flex items-center justify-between max-w-7xl mx-auto">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">

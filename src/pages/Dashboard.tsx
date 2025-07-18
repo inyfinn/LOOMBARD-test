@@ -2,7 +2,6 @@ import { PortfolioSection } from "@/components/PortfolioSection";
 import { PromoBanner } from "@/components/PromoBanner";
 import { CurrencyRatesTable } from "@/components/CurrencyRatesTable";
 import { RankingsSection } from "@/components/RankingsSection";
-import { QuickActions } from "@/components/QuickActions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useWallet } from "@/context/WalletContext";
 import { ArrowUp, ArrowDown, ArrowLeftRight } from "lucide-react";
@@ -17,16 +16,6 @@ export default function Dashboard() {
           {/* Left Column - Portfolio */}
           <div className="lg:col-span-1 space-y-6">
             <PortfolioSection />
-            
-            {/* Quick Actions */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Szybkie akcje</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <QuickActions />
-              </CardContent>
-            </Card>
           </div>
 
           {/* Middle Column - Main Content */}

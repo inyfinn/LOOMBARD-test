@@ -142,6 +142,22 @@ export function RankingsTable({ category: propCategory, continent: propContinent
     filtered = filtered.filter((r) => currencyMeta[r.symbol]?.continent === continent);
   }
 
+  // Fallback: if no data for gains/losses (first load), show top/bottom by rate
+  if (filtered.length === 0 && (tab === 'gains' || tab === 'losses')) {
+    const allRows = rows.filter(() => true);
+    if (continent !== "All") {
+      filtered = allRows.filter((r) => currencyMeta[r.symbol]?.continent === continent);
+    } else {
+      filtered = allRows;
+    }
+    
+    if (tab === 'gains') {
+      filtered = filtered.sort((a, b) => b.rate - a.rate).slice(0, 10);
+    } else if (tab === 'losses') {
+      filtered = filtered.sort((a, b) => a.rate - b.rate).slice(0, 10);
+    }
+  }
+
   const applySort = (a: Row, b: Row) => {
     const dirMult = sortDir === "asc" ? 1 : -1;
     if (sortCol === "symbol") return a.symbol.localeCompare(b.symbol) * dirMult;

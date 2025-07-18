@@ -44,13 +44,29 @@ export function RankingsSection(){
     });
     let gains = items.filter(i => i.change > 0).sort((a, b) => b.change - a.change).slice(0, 5);
     let losses = items.filter(i => i.change < 0).sort((a, b) => a.change - b.change).slice(0, 5);
+    
     // fallback: if no positive/negative changes (first load), pick top/bottom by rate
     if (gains.length === 0) {
-      gains = [...items].sort((a,b)=> (ratesRef.current[b.symbol]-ratesRef.current[a.symbol])).slice(0,5).map(i=>({...i,change:0,value:"0.00%",category:'gains'}));
+      const allItems = Object.entries(ratesRef.current).map(([code, rate]) => ({
+        symbol: code, 
+        name: code, 
+        value: `${rate.toFixed(4)} PLN`, 
+        change: 0, 
+        category: 'gains' as const
+      }));
+      gains = allItems.sort((a, b) => parseFloat(b.value) - parseFloat(a.value)).slice(0, 5);
     }
     if (losses.length === 0) {
-      losses = [...items].sort((a,b)=> (ratesRef.current[a.symbol]-ratesRef.current[b.symbol])).slice(0,5).map(i=>({...i,change:0,value:"0.00%",category:'losses'}));
+      const allItems = Object.entries(ratesRef.current).map(([code, rate]) => ({
+        symbol: code, 
+        name: code, 
+        value: `${rate.toFixed(4)} PLN`, 
+        change: 0, 
+        category: 'losses' as const
+      }));
+      losses = allItems.sort((a, b) => parseFloat(a.value) - parseFloat(b.value)).slice(0, 5);
     }
+    
     setGroupedData({ gains, losses });
     snapshot.current = ratesRef.current;
     lastComputeTs.current = now;

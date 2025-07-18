@@ -10,9 +10,10 @@ interface WalletContextValue {
   rates: Record<string, number>;
   transactions: Transaction[];
   lastUpdate: number;
-  deposit: (currency: string, amount: number) => void;
-  withdraw: (currency: string, amount: number) => { success: boolean; error?: string };
-  exchange: (from: string, to: string, amount: number) => { success: boolean; error?: string };
+  deposit: (currency: string, amount: number) => Transaction | null;
+  withdraw: (currency: string, amount: number) => { success: boolean; error?: string; tx?: Transaction };
+  exchange: (from: string, to: string, amount: number) => { success: boolean; error?: string; tx?: Transaction };
+  rollback: (tx: Transaction) => void;
 }
 
 const initialRates: Record<string, number> = {
@@ -82,18 +83,21 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const addTransaction = (t: Transaction) =>
     setTransactions((prev) => [t, ...prev.slice(0, 19)]); // keep max 20
 
-  const deposit = (currency: string, amount: number) => {
-    if (amount <= 0) return;
+  const deposit = (currency: string, amount: number):Transaction|null => {
+    if (amount <= 0) return null;
     setBalances((prev) => ({ ...prev, [currency]: parseFloat(((prev[currency] || 0) + amount).toFixed(2)) }));
-    addTransaction({ type: "deposit", currency, amount, timestamp: Date.now() });
+    const tx:Transaction={ type: "deposit", currency, amount, timestamp: Date.now() };
+    addTransaction(tx);
+    return tx;
   };
 
   const withdraw = (currency: string, amount: number) => {
     const bal = balances[currency] || 0;
     if (amount > bal) return { success: false, error: "Brak środków" };
     setBalances((prev) => ({ ...prev, [currency]: parseFloat((bal - amount).toFixed(2)) }));
-    addTransaction({ type: "withdraw", currency, amount, timestamp: Date.now() });
-    return { success: true };
+    const tx:Transaction={ type:"withdraw",currency,amount,timestamp:Date.now() };
+    addTransaction(tx);
+    return { success: true, tx };
   };
 
   const exchange = (from: string, to: string, amount: number) => {
@@ -121,13 +125,30 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       return next;
     });
 
-    addTransaction({ type: "exchange", from, to, amount, received, timestamp: Date.now() });
-    return { success: true };
+    const tx:Transaction={ type:"exchange",from,to,amount,received,timestamp:Date.now() };
+    addTransaction(tx);
+    return { success: true, tx };
+  };
+
+  const rollback = (tx: Transaction) => {
+    if(tx.type==='deposit'){
+       withdraw(tx.currency, tx.amount);
+    }else if(tx.type==='withdraw'){
+       deposit(tx.currency, tx.amount);
+    }else if(tx.type==='exchange'){
+       // reverse exchange
+       setBalances(prev=>{
+         const n={...prev};
+         n[tx.from]= (n[tx.from]||0)+tx.amount;
+         n[tx.to]= (n[tx.to]||0)-tx.received;
+         return n;
+       });
+    }
   };
 
   return (
     <WalletContext.Provider
-      value={{ balances, rates: ratesData, transactions, lastUpdate, deposit, withdraw, exchange }}>
+      value={{ balances, rates: ratesData, transactions, lastUpdate, deposit, withdraw, exchange, rollback }}>
       {children}
     </WalletContext.Provider>
   );

@@ -72,7 +72,7 @@ interface Props {
 export function RankingsTable({ category: propCategory, continent: propContinent, showCategoryTabs = true }: Props) {
   const { rates } = useWallet();
   const snapshot = useRef<Record<string, number>>(rates);
-  const lastBaselineTs = useRef<number>(Date.now());
+  const lastComputeTs = useRef<number>(0);
   const [rows, setRows] = useState<Row[]>([]);
 
   const [sortCol, setSortCol] = useState<SortCol>("change");
@@ -82,10 +82,7 @@ export function RankingsTable({ category: propCategory, continent: propContinent
 
   useEffect(() => {
     const now = Date.now();
-    if (now - lastBaselineTs.current > 86400000) {
-      snapshot.current = rates;
-      lastBaselineTs.current = now;
-    }
+    if (now - lastComputeTs.current < 86400000 && lastComputeTs.current !== 0) return;
 
     const list: Row[] = Object.entries(rates).map(([symbol, rate]) => {
       const old = snapshot.current[symbol] ?? rate;
@@ -93,6 +90,9 @@ export function RankingsTable({ category: propCategory, continent: propContinent
       return { symbol, name: symbol, rate: parseFloat(rate.toFixed(4)), change };
     });
     setRows(list);
+
+    snapshot.current = rates;
+    lastComputeTs.current = now;
   }, [rates]);
 
   const categories: Record<

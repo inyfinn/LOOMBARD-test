@@ -20,16 +20,13 @@ const categoryConfig = {
 export function RankingsSection(){
   const { rates } = useWallet();
   const snapshot = useRef<Record<string, number>>(rates); // baseline rates
-  const lastBaselineTs = useRef<number>(Date.now());
+  const lastComputeTs = useRef<number>(0);
   const [groupedData, setGroupedData] = useState<{ [k: string]: RankingItem[] }>({ gains: [], losses: [] });
 
   useEffect(() => {
     const now = Date.now();
-    // refresh baseline co 24h
-    if (now - lastBaselineTs.current > 86400000) {
-      snapshot.current = rates;
-      lastBaselineTs.current = now;
-    }
+    // compute only once per 24h
+    if (now - lastComputeTs.current < 86400000 && lastComputeTs.current !== 0) return;
 
     const items: RankingItem[] = Object.entries(rates).map(([code, rate]) => {
       const old = snapshot.current[code] ?? rate;
@@ -43,15 +40,13 @@ export function RankingsSection(){
       };
     });
 
-    const gains = items
-      .filter((i) => i.change > 0)
-      .sort((a, b) => b.change - a.change)
-      .slice(0, 5);
-    const losses = items
-      .filter((i) => i.change < 0)
-      .sort((a, b) => a.change - b.change)
-      .slice(0, 5);
+    const gains = items.filter((i) => i.change > 0).sort((a, b) => b.change - a.change).slice(0, 5);
+    const losses = items.filter((i) => i.change < 0).sort((a, b) => a.change - b.change).slice(0, 5);
     setGroupedData({ gains, losses });
+
+    // set new baseline and timestamp
+    snapshot.current = rates;
+    lastComputeTs.current = now;
   }, [rates]);
 
   const renderRankingCard = (category: keyof typeof categoryConfig, items: RankingItem[]) => {

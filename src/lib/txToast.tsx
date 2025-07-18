@@ -1,50 +1,57 @@
 import { toast } from "@/components/ui/sonner";
 import { Button } from "@/components/ui/button";
 import { Transaction } from "@/context/WalletContext";
+import { useEffect, useState } from "react";
 
 export function showTransactionToast(
   tx: Transaction | null | undefined,
   rollback: (tx: Transaction) => void
 ) {
   if (!tx) return;
-  let confirmed = false;
-  const id = toast.custom((t) => (
-    <div className="w-[260px] sm:w-[300px] space-y-2">
-      <p className="text-sm font-medium">Transakcja oczekuje potwierdzenia</p>
-      <div className="flex gap-2">
-        <Button
-          size="sm"
-          onClick={() => {
-            confirmed = true;
-            toast.dismiss(t.id);
-          }}
-        >
-          Potwierdź
-        </Button>
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={() => {
-            confirmed = true;
-            rollback(tx);
-            toast.dismiss(t.id);
-          }}
-        >
-          Cofnij
-        </Button>
+
+  const CountdownToast: React.FC<{ toastId: number }> = ({ toastId }) => {
+    const [remaining, setRemaining] = useState<number>(15);
+
+    useEffect(() => {
+      const iv = setInterval(() => {
+        setRemaining((r) => r - 1);
+      }, 1000);
+      return () => clearInterval(iv);
+    }, []);
+
+    useEffect(() => {
+      if (remaining <= 0) {
+        rollback(tx!);
+        toast.dismiss(toastId);
+      }
+    }, [remaining]);
+
+    return (
+      <div className="flex flex-col items-center w-full p-7 space-y-4 animate-in slide-in-from-top rounded-md bg-background shadow-lg">
+        <p className="text-sm font-medium text-center">Transakcja oczekuje potwierdzenia</p>
+        <div className="flex gap-2">
+          <Button size="sm" onClick={() => toast.dismiss(toastId)}>
+            Potwierdź
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => {
+              rollback(tx!);
+              toast.dismiss(toastId);
+            }}
+          >
+            Cofnij
+          </Button>
+        </div>
+        <p className="text-xs text-muted-foreground text-center">Brak potwierdzenia za {remaining}s</p>
       </div>
-      <p className="text-xs text-muted-foreground">
-        Brak potwierdzenia w 15&nbsp;s anuluje transakcję.
-      </p>
-    </div>
-  ),{
-    position:"top-center",
-    duration:15000
+    );
+  };
+
+  const id = toast.custom((t) => <CountdownToast toastId={t.id} />, {
+    position: "top-center",
+    duration: 15000,
+    className: "!p-0", // padding handled inside
   });
-  setTimeout(() => {
-    if (!confirmed) {
-      rollback(tx);
-      toast.dismiss(id);
-    }
-  }, 15000);
 } 

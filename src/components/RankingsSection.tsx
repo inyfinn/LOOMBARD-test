@@ -19,26 +19,25 @@ const categoryConfig = {
 
 export function RankingsSection(){
   const { rates } = useWallet();
-  const prev = useRef<Record<string, number>>(rates);
-  const [,force]=useState(0);
+  const snapshot = useRef<Record<string, number>>(rates);
+  const [groupedData,setGroupedData]=useState<{[k:string]:RankingItem[]}>({gains:[],losses:[]});
+
   useEffect(()=>{
-    const id=setInterval(()=>{
-      prev.current = rates;
-      force(c=>c+1); // trigger re-render
-    },86400000);
+    const calc=()=>{
+      const items:RankingItem[] = Object.entries(rates).map(([code,rate])=>{
+        const old = snapshot.current[code]??rate;
+        const change = ((rate-old)/old)*100;
+        return {symbol:code,name:code,value:`${change.toFixed(2)}%`,change,category: change>=0?'gains':'losses'};
+      });
+      const gains = items.filter(i=>i.change>0).sort((a,b)=>b.change-a.change).slice(0,5);
+      const losses = items.filter(i=>i.change<0).sort((a,b)=>a.change-b.change).slice(0,5);
+      setGroupedData({gains,losses});
+      snapshot.current = rates;
+    };
+    calc(); // initial
+    const id=setInterval(calc,86400000);
     return ()=>clearInterval(id);
-  },[rates]);
-
-  const items:RankingItem[] = Object.entries(rates).map(([code,rate])=>{
-    const old = prev.current[code]??rate;
-    const change = ((rate-old)/old)*100;
-    return {symbol:code,name:code,value:`${change.toFixed(2)}%`,change,category: change>=0?'gains':'losses'};
-  });
-
-  const topGains = items.filter(i=>i.change>0).sort((a,b)=>b.change-a.change).slice(0,5);
-  const topLoss = items.filter(i=>i.change<0).sort((a,b)=>a.change-b.change).slice(0,5);
-
-  const groupedData:{[k:string]:RankingItem[]}={gains:topGains,losses:topLoss};
+  },[]);
 
   const renderRankingCard = (category: keyof typeof categoryConfig, items: RankingItem[]) => {
     const config = categoryConfig[category];

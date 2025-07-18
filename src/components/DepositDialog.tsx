@@ -20,13 +20,13 @@ export const DepositDialog: React.FC<Props> = ({ open, onOpenChange }) => {
   const handle = () => {
     const amt = parseFloat(amount);
     if (!isNaN(amt) && amt > 0) {
+      onOpenChange(false);
+      setAmount("");
       showConfirmToast(
-        `Wpłata ${amt.toFixed(2)} ${currency}. Potwierdź`,
-        () => { deposit(currency, amt); onOpenChange(false); },
+        `Wpłata ${amt.toFixed(2)} ${currency}`,
+        () => { deposit(currency, amt); },
         undefined
       );
-      // keep dialog open until confirmed or cancelled automatically
-      setAmount("");
     }
   };
 

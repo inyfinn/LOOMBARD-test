@@ -25,13 +25,13 @@ export const WithdrawDialog: React.FC<Props> = ({ open, onOpenChange }) => {
     if (isNaN(amt) || amt <= 0) return;
     // preview balance check
     if (amt > bal) { setError("Brak środków"); return; }
+    onOpenChange(false);
+    setAmount("");
     showConfirmToast(
-      `Wypłata ${amt.toFixed(2)} ${currency}. Potwierdź`,
+      `Wypłata ${amt.toFixed(2)} ${currency}`,
       () => {
         const res = withdraw(currency, amt);
         setError(null);
-        onOpenChange(false);
-        setAmount("");
       },
       undefined
     );

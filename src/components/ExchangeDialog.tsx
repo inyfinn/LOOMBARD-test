@@ -58,16 +58,16 @@ export const ExchangeDialog: React.FC<Props> = ({ open, onOpenChange }) => {
     if (isNaN(amt) || amt <= 0) return;
     // pre-check
     if (amt > maxBalance) { setError("Brak środków"); return; }
+    onOpenChange(false);
+    setFromAmount("");
     showConfirmToast(
-      `Wymiana ${amt.toFixed(2)} ${fromCur} na ${toCur}. Potwierdź`,
+      `Wymiana ${amt.toFixed(2)} ${fromCur} na ${toCur}`,
       () => {
         const res = exchange(fromCur, toCur, amt);
         if (!res.success && res.error) {
           setError(res.error);
           return;
         }
-        onOpenChange(false);
-        setFromAmount("");
         setError(null);
       },
       undefined

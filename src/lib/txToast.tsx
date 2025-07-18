@@ -21,8 +21,8 @@ export function showConfirmToast(
     useEffect(() => {
       const t = setTimeout(() => {
         setShake(true);
-        setTimeout(() => setShake(false), 500);
-      }, 5000);
+        setTimeout(() => setShake(false), 400);
+      }, 2000);
       return () => clearTimeout(t);
     }, []);
 
@@ -39,7 +39,7 @@ export function showConfirmToast(
         style={{
           width: typeof window !== 'undefined' && window.innerWidth < 640 ? 'calc(100vw - 60px)' : 'auto',
           position:'relative',left:'50%',transform:'translateX(-50%)',
-          marginTop: typeof window !== 'undefined' && window.innerWidth >= 1024 ? '20vh' : undefined,
+          top: typeof window !== 'undefined' && window.innerWidth >= 1024 ? '20vh' : undefined,
           paddingLeft: typeof window !== 'undefined' && window.innerWidth >= 1024 ? 68 : undefined,
           paddingRight: typeof window !== 'undefined' && window.innerWidth >= 1024 ? 68 : undefined,
           paddingTop: typeof window !== 'undefined' && window.innerWidth >= 1024 ? 58 : undefined,

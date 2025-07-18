@@ -111,6 +111,11 @@ All colors MUST be HSL.
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   }
 
+  /* Prevent body scroll when modal is active */
+  body.modal-open {
+    overflow: hidden;
+  }
+
   /* Layout classes for responsive design */
   .layout-mobile {
     --max-width: 390px;
@@ -154,21 +159,21 @@ All colors MUST be HSL.
 }
 
 @keyframes shake {
-  0% { transform: translateX(-50%) translateY(0); }
-  10% { transform: translateX(-50%) translateY(-4px); }
-  20% { transform: translateX(-50%) translateY(4px); }
-  30% { transform: translateX(-50%) translateY(-4px); }
-  40% { transform: translateX(-50%) translateY(4px); }
-  50% { transform: translateX(-50%) translateY(-4px); }
-  60% { transform: translateX(-50%) translateY(4px); }
-  70% { transform: translateX(-50%) translateY(-4px); }
-  80% { transform: translateX(-50%) translateY(4px); }
-  90% { transform: translateX(-50%) translateY(-2px); }
-  100% { transform: translateX(-50%) translateY(0); }
+  0% { transform: translateX(-50%) translateY(-50%); }
+  10% { transform: translateX(-50%) translateY(-50%) translateY(-4px); }
+  20% { transform: translateX(-50%) translateY(-50%) translateY(4px); }
+  30% { transform: translateX(-50%) translateY(-50%) translateY(-4px); }
+  40% { transform: translateX(-50%) translateY(-50%) translateY(4px); }
+  50% { transform: translateX(-50%) translateY(-50%) translateY(-4px); }
+  60% { transform: translateX(-50%) translateY(-50%) translateY(4px); }
+  70% { transform: translateX(-50%) translateY(-50%) translateY(-4px); }
+  80% { transform: translateX(-50%) translateY(-50%) translateY(4px); }
+  90% { transform: translateX(-50%) translateY(-50%) translateY(-2px); }
+  100% { transform: translateX(-50%) translateY(-50%); }
 }
 
 @keyframes shake-desktop {
-  0% { transform: translateX(-50%) scale(1.2) translateY(0); }
+  0% { transform: translateX(-50%) scale(1.2); }
   10% { transform: translateX(-50%) scale(1.2) translateY(-4px); }
   20% { transform: translateX(-50%) scale(1.2) translateY(4px); }
   30% { transform: translateX(-50%) scale(1.2) translateY(-4px); }
@@ -178,7 +183,7 @@ All colors MUST be HSL.
   70% { transform: translateX(-50%) scale(1.2) translateY(-4px); }
   80% { transform: translateX(-50%) scale(1.2) translateY(4px); }
   90% { transform: translateX(-50%) scale(1.2) translateY(-2px); }
-  100% { transform: translateX(-50%) scale(1.2) translateY(0); }
+  100% { transform: translateX(-50%) scale(1.2); }
 }
 
 .shake {

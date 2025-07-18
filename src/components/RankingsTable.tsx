@@ -63,26 +63,36 @@ const currencyMeta: Record<string, { continent: string }> = {
   ZAR: { continent: "Africa" },
 };
 
-export function RankingsTable() {
+interface Props {
+  category?: string; // "gains" | "losses" | "highest" | "lowest" | "all"
+  continent?: string;
+  showCategoryTabs?: boolean;
+}
+
+export function RankingsTable({ category: propCategory, continent: propContinent, showCategoryTabs = true }: Props) {
   const { rates } = useWallet();
   const snapshot = useRef<Record<string, number>>(rates);
+  const lastBaselineTs = useRef<number>(Date.now());
   const [rows, setRows] = useState<Row[]>([]);
 
   const [sortCol, setSortCol] = useState<SortCol>("change");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
-  const [tab, setTab] = useState<string>("gains");
-  const [continent, setContinent] = useState<string>("All");
+  const [tab, setTab] = useState<string>(propCategory || "gains");
+  const [continent, setContinent] = useState<string>(propContinent || "All");
 
   useEffect(() => {
-    const compute = () => {
-      const list: Row[] = Object.entries(rates).map(([symbol, rate]) => {
-        const old = snapshot.current[symbol] ?? rate;
-        const change = ((rate - old) / old) * 100;
-        return { symbol, name: symbol, rate: parseFloat(rate.toFixed(4)), change };
-      });
-      setRows(list);
-    };
-    compute();
+    const now = Date.now();
+    if (now - lastBaselineTs.current > 86400000) {
+      snapshot.current = rates;
+      lastBaselineTs.current = now;
+    }
+
+    const list: Row[] = Object.entries(rates).map(([symbol, rate]) => {
+      const old = snapshot.current[symbol] ?? rate;
+      const change = ((rate - old) / old) * 100;
+      return { symbol, name: symbol, rate: parseFloat(rate.toFixed(4)), change };
+    });
+    setRows(list);
   }, [rates]);
 
   const categories: Record<
@@ -161,17 +171,20 @@ export function RankingsTable() {
 
   return (
     <div className="space-y-4">
-      <Tabs value={tab} onValueChange={setTab} className="w-full">
-        <TabsList className="flex flex-wrap gap-1">
-          {Object.entries(categories).map(([key, { label }]) => (
-            <TabsTrigger key={key} value={key} className="text-xs sm:text-sm">
-              {label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-      </Tabs>
+      {showCategoryTabs && (
+        <Tabs value={tab} onValueChange={setTab} className="w-full">
+          <TabsList className="flex flex-wrap gap-1">
+            {Object.entries(categories).map(([key, { label }]) => (
+              <TabsTrigger key={key} value={key} className="text-xs sm:text-sm">
+                {label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
+      )}
 
       {/* Continent Filter */}
+      {propCategory === undefined && (
       <div className="flex items-center gap-2">
         <label htmlFor="continent" className="text-sm text-muted-foreground">
           Kontynent:
@@ -189,6 +202,7 @@ export function RankingsTable() {
           ))}
         </select>
       </div>
+      )}
 
       <Table>
         <TableHeader>

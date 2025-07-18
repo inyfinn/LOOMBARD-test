@@ -1,14 +1,73 @@
 import { RankingsTable } from "@/components/RankingsTable";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useState } from "react";
 
-export default function Rankings(){
+export default function Rankings() {
+  const continents = [
+    "All",
+    "Europe",
+    "North America",
+    "South America",
+    "Asia",
+    "Africa",
+    "Oceania",
+    "Middle East",
+  ];
+
+  const [continent, setContinent] = useState<string>("All");
+
   return (
     <div className="min-h-screen bg-background pb-20 pt-4">
-      <div className="container max-w-lg mx-auto px-4 space-y-4">
+      <div className="container max-w-4xl mx-auto px-4 space-y-6">
         <div className="text-center">
           <h1 className="text-2xl font-bold">Rankingi 24h</h1>
-          <p className="text-muted-foreground">Obszerna lista z podziałem na kategorie</p>
         </div>
-        <RankingsTable />
+
+        {/* Continent selector */}
+        <Tabs value={continent} onValueChange={setContinent} className="w-full">
+          <TabsList className="flex flex-wrap gap-1 justify-center">
+            {continents.map((c) => (
+              <TabsTrigger key={c} value={c} className="text-xs sm:text-sm">
+                {c}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Wszystkie - full width */}
+          <div className="md:col-span-2">
+            <RankingsTable
+              category="all"
+              continent={continent}
+              showCategoryTabs={false}
+            />
+          </div>
+
+          {/* Zyski & Straty */}
+          <RankingsTable
+            category="gains"
+            continent={continent}
+            showCategoryTabs={false}
+          />
+          <RankingsTable
+            category="losses"
+            continent={continent}
+            showCategoryTabs={false}
+          />
+
+          {/* Najwyższy / Najniższy */}
+          <RankingsTable
+            category="highest"
+            continent={continent}
+            showCategoryTabs={false}
+          />
+          <RankingsTable
+            category="lowest"
+            continent={continent}
+            showCategoryTabs={false}
+          />
+        </div>
       </div>
     </div>
   );

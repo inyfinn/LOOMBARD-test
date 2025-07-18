@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { showTransactionToast } from "@/lib/txToast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,7 +12,7 @@ interface Props {
 }
 
 export const DepositDialog: React.FC<Props> = ({ open, onOpenChange }) => {
-  const { deposit, rates } = useWallet();
+  const { deposit, rates, rollback } = useWallet();
   const currencyList = Object.keys(rates);
   const [currency, setCurrency] = useState("PLN");
   const [amount, setAmount] = useState("");
@@ -19,7 +20,8 @@ export const DepositDialog: React.FC<Props> = ({ open, onOpenChange }) => {
   const handle = () => {
     const amt = parseFloat(amount);
     if (!isNaN(amt) && amt > 0) {
-      deposit(currency, amt);
+      const tx = deposit(currency, amt);
+      showTransactionToast(tx, rollback);
       onOpenChange(false);
       setAmount("");
     }
@@ -27,7 +29,15 @@ export const DepositDialog: React.FC<Props> = ({ open, onOpenChange }) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-full max-w-md">
+      <DialogContent
+        className="w-full max-w-md top-[150px] translate-y-0 sm:top-[50%] sm:translate-y-[-50%]"
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            handle();
+          }
+        }}
+      >
         <DialogHeader>
           <DialogTitle>Wpłać środki</DialogTitle>
           <DialogDescription>Dodaj środki do swojego portfela.</DialogDescription>

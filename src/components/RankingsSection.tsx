@@ -19,26 +19,40 @@ const categoryConfig = {
 
 export function RankingsSection(){
   const { rates } = useWallet();
-  const snapshot = useRef<Record<string, number>>(rates);
-  const [groupedData,setGroupedData]=useState<{[k:string]:RankingItem[]}>({gains:[],losses:[]});
+  const snapshot = useRef<Record<string, number>>(rates); // baseline rates
+  const lastBaselineTs = useRef<number>(Date.now());
+  const [groupedData, setGroupedData] = useState<{ [k: string]: RankingItem[] }>({ gains: [], losses: [] });
 
-  useEffect(()=>{
-    const calc=()=>{
-      const items:RankingItem[] = Object.entries(rates).map(([code,rate])=>{
-        const old = snapshot.current[code]??rate;
-        const change = ((rate-old)/old)*100;
-        return {symbol:code,name:code,value:`${change.toFixed(2)}%`,change,category: change>=0?'gains':'losses'};
-      });
-      const gains = items.filter(i=>i.change>0).sort((a,b)=>b.change-a.change).slice(0,5);
-      const losses = items.filter(i=>i.change<0).sort((a,b)=>a.change-b.change).slice(0,5);
-      setGroupedData({gains,losses});
+  useEffect(() => {
+    const now = Date.now();
+    // refresh baseline co 24h
+    if (now - lastBaselineTs.current > 86400000) {
       snapshot.current = rates;
-    };
-    // pierwsze wyliczenie po 0.5 s aby mieć różnicę od startu
-    const first=setTimeout(calc,500);
-    const id=setInterval(calc,86400000);
-    return ()=>clearInterval(id);
-  },[]);
+      lastBaselineTs.current = now;
+    }
+
+    const items: RankingItem[] = Object.entries(rates).map(([code, rate]) => {
+      const old = snapshot.current[code] ?? rate;
+      const change = ((rate - old) / old) * 100;
+      return {
+        symbol: code,
+        name: code,
+        value: `${change.toFixed(2)}%`,
+        change,
+        category: change >= 0 ? "gains" : "losses",
+      };
+    });
+
+    const gains = items
+      .filter((i) => i.change > 0)
+      .sort((a, b) => b.change - a.change)
+      .slice(0, 5);
+    const losses = items
+      .filter((i) => i.change < 0)
+      .sort((a, b) => a.change - b.change)
+      .slice(0, 5);
+    setGroupedData({ gains, losses });
+  }, [rates]);
 
   const renderRankingCard = (category: keyof typeof categoryConfig, items: RankingItem[]) => {
     const config = categoryConfig[category];

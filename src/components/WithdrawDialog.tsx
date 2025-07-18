@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { showTransactionToast } from "@/lib/txToast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,7 +12,7 @@ interface Props {
 }
 
 export const WithdrawDialog: React.FC<Props> = ({ open, onOpenChange }) => {
-  const { withdraw, balances, rates } = useWallet();
+  const { withdraw, balances, rollback } = useWallet();
   const currencyList = Object.keys(balances).filter(c=>balances[c]>0);
   const [currency, setCurrency] = useState("PLN");
   const [amount, setAmount] = useState("");
@@ -30,11 +31,15 @@ export const WithdrawDialog: React.FC<Props> = ({ open, onOpenChange }) => {
     setError(null);
     onOpenChange(false);
     setAmount("");
+    if (res.tx) showTransactionToast(res.tx, rollback);
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-full max-w-md">
+      <DialogContent
+        className="w-full max-w-md top-[150px] translate-y-0 sm:top-[50%] sm:translate-y-[-50%]"
+        onKeyDown={(e)=>{ if(e.key==='Enter'){ e.preventDefault(); handle(false); }}}
+      >
         <DialogHeader>
           <DialogTitle>Wypłać środki</DialogTitle>
           <DialogDescription>Usuń środki z portfela.</DialogDescription>

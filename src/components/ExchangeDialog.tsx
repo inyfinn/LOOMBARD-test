@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { showTransactionToast } from "@/lib/txToast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,7 +12,7 @@ interface Props {
 }
 
 export const ExchangeDialog: React.FC<Props> = ({ open, onOpenChange }) => {
-  const { balances, rates, exchange } = useWallet();
+  const { balances, rates, exchange, rollback } = useWallet();
   const [fromCur, setFromCur] = useState<string>("PLN");
   const [toCur, setToCur] = useState<string>("EUR");
   const [fromAmount, setFromAmount] = useState<string>("");
@@ -64,13 +65,17 @@ export const ExchangeDialog: React.FC<Props> = ({ open, onOpenChange }) => {
     // clear fields
     setFromAmount("");
     setError(null);
+    if (res.tx) showTransactionToast(res.tx, rollback);
   };
 
   const maxBalance = balances[fromCur] || 0;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-full max-w-md">
+      <DialogContent
+        className="w-full max-w-md top-[150px] translate-y-0 sm:top-[50%] sm:translate-y-[-50%]"
+        onKeyDown={(e)=>{ if(e.key==='Enter'){ e.preventDefault(); handleSubmit(); }}}
+      >
         <DialogHeader>
           <DialogTitle>Wymiana walut</DialogTitle>
           <DialogDescription>Wybierz waluty i kwotę transakcji.</DialogDescription>

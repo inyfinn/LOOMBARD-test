@@ -11,6 +11,7 @@ import NotFound from "./pages/NotFound";
 import { BottomNav } from "./components/BottomNav";
 import { WalletProvider } from "@/context/WalletContext";
 import TransactionsPage from "./pages/Transactions";
+import OfferPage from "./pages/Offer";
 import { UpdateInfo } from "@/components/UpdateInfo";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
               <Route path="/kursy" element={<Rates />} />
               <Route path="/transakcje" element={<TransactionsPage />} />
               <Route path="/rankingi" element={<Rankings />} />
+              <Route path="/lokata-premium" element={<OfferPage/>} />
               <Route path="/ustawienia" element={<Settings />} />
               <Route path="*" element={<NotFound />} />
             </Routes>

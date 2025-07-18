@@ -135,6 +135,15 @@ All colors MUST be HSL.
       transform: translateY(0);
     }
   }
+
+  /* Swap button styles for dark mode */
+  .dark .swap-button {
+    @apply bg-blue-500 hover:bg-blue-600 text-white border-blue-500 hover:border-blue-600;
+  }
+
+  .swap-button {
+    @apply bg-blue-500 hover:bg-blue-600 text-white border-blue-500 hover:border-blue-600;
+  }
 }
 
 @keyframes shake {
@@ -150,8 +159,29 @@ All colors MUST be HSL.
   90% { transform: translateX(-50%) translateY(-2px); }
   100% { transform: translateX(-50%) translateY(0); }
 }
+
+@keyframes shake-desktop {
+  0% { transform: translateX(-50%) scale(1.2) translateY(0); }
+  10% { transform: translateX(-50%) scale(1.2) translateY(-4px); }
+  20% { transform: translateX(-50%) scale(1.2) translateY(4px); }
+  30% { transform: translateX(-50%) scale(1.2) translateY(-4px); }
+  40% { transform: translateX(-50%) scale(1.2) translateY(4px); }
+  50% { transform: translateX(-50%) scale(1.2) translateY(-4px); }
+  60% { transform: translateX(-50%) scale(1.2) translateY(4px); }
+  70% { transform: translateX(-50%) scale(1.2) translateY(-4px); }
+  80% { transform: translateX(-50%) scale(1.2) translateY(4px); }
+  90% { transform: translateX(-50%) scale(1.2) translateY(-2px); }
+  100% { transform: translateX(-50%) scale(1.2) translateY(0); }
+}
+
 .shake {
   animation: shake 1s ease-in-out;
+}
+
+@media (min-width: 1024px) {
+  .shake {
+    animation: shake-desktop 1s ease-in-out;
+  }
 }
 
 .scrollbar-hide {

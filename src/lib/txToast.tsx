@@ -10,6 +10,7 @@ export function showConfirmToast(
   const CountdownToast: React.FC<{ toastId: number }> = ({ toastId }) => {
     const [remaining, setRemaining] = useState<number>(15);
     const [shake, setShake] = useState(false);
+    const [pulseColor, setPulseColor] = useState(false);
 
     useEffect(() => {
       const iv = setInterval(() => {
@@ -29,12 +30,28 @@ export function showConfirmToast(
       return () => timers.forEach(t => clearTimeout(t));
     }, []);
 
+    // Pulsowanie czerwonego koloru w ostatnich 5 sekundach
+    useEffect(() => {
+      if (remaining <= 5) {
+        const pulseInterval = setInterval(() => {
+          setPulseColor(prev => !prev);
+        }, 700);
+        return () => clearInterval(pulseInterval);
+      }
+    }, [remaining]);
+
     useEffect(() => {
       if (remaining <= 0) {
-        onCancel?.();
+        onCancel?.()
         toast.dismiss(toastId);
       }
     }, [remaining]);
+
+    const progressPercentage = (remaining / 15) * 100;
+    const isLast5Seconds = remaining <= 5;
+    const progressColor = isLast5Seconds 
+      ? (pulseColor ? '#dc2626' : '#991b1b') // Czerwony pulsujący
+      : '#16a34a'; // Zielony
 
     return (
       <div
@@ -46,6 +63,7 @@ export function showConfirmToast(
           paddingLeft: typeof window !== 'undefined' && window.innerWidth >= 1024 ? 68 : undefined,
           paddingRight: typeof window !== 'undefined' && window.innerWidth >= 1024 ? 68 : undefined,
           paddingTop: typeof window !== 'undefined' && window.innerWidth >= 1024 ? 58 : undefined,
+          transform: typeof window !== 'undefined' && window.innerWidth >= 1024 ? 'translateX(-50%) scale(1.2)' : 'translateX(-50%)',
         }}
       >
         <p className="font-medium text-center" style={{fontSize: typeof window!=='undefined' && window.innerWidth>=1024? '1.125rem':'1rem'}}>{message}</p>
@@ -75,6 +93,30 @@ export function showConfirmToast(
         >
           Brak potwierdzenia za {remaining}s
         </p>
+        
+        {/* Progress bar */}
+        <div 
+          className="w-full h-1 bg-gray-200 rounded-full overflow-hidden"
+          style={{ 
+            position: 'absolute', 
+            bottom: '0', 
+            left: '0', 
+            right: '0',
+            height: '5px',
+            borderBottomLeftRadius: '0.375rem',
+            borderBottomRightRadius: '0.375rem'
+          }}
+        >
+          <div
+            className="h-full transition-all duration-1000 ease-linear"
+            style={{
+              width: `${progressPercentage}%`,
+              backgroundColor: progressColor,
+              transform: 'scaleX(1)',
+              transformOrigin: 'center'
+            }}
+          />
+        </div>
       </div>
     );
   };

@@ -156,7 +156,7 @@ export default function Rates() {
               Ostatnia aktualizacja: dzisiaj, 15:30
             </p>
             <p className="text-xs text-muted-foreground mt-1">
-              Kursy aktualizowane co 15 minut
+              Kursy aktualizowane są na bieżąco, co pół sekundy
             </p>
           </CardContent>
         </Card>

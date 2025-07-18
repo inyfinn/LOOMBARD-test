@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { useWallet } from "@/context/WalletContext";
+import { ArrowUpDown } from "lucide-react";
 
 interface Props {
   open: boolean;
@@ -19,6 +20,7 @@ export const ExchangeDialog: React.FC<Props> = ({ open, onOpenChange }) => {
   const [toAmount, setToAmount] = useState<string>("");
   const [lastEdited, setLastEdited] = useState<'from' | 'to'>("from");
   const [error, setError] = useState<string | null>(null);
+  const [isRotating, setIsRotating] = useState(false);
 
   const currencyList = Object.keys(rates);
 
@@ -52,6 +54,25 @@ export const ExchangeDialog: React.FC<Props> = ({ open, onOpenChange }) => {
       if (formatted !== fromAmount) setFromAmount(formatted);
     }
   }, [toAmount, fromCur, toCur, rates, lastEdited]);
+
+  const handleSwap = () => {
+    setIsRotating(true);
+    
+    // Zamień waluty
+    const tempCur = fromCur;
+    setFromCur(toCur);
+    setToCur(tempCur);
+    
+    // Zamień kwoty
+    const tempAmount = fromAmount;
+    setFromAmount(toAmount);
+    setToAmount(tempAmount);
+    
+    // Zatrzymaj animację po 1 sekundzie
+    setTimeout(() => {
+      setIsRotating(false);
+    }, 1000);
+  };
 
   const handleSubmit = (useAll: boolean = false) => {
     let amt = useAll ? maxBalance : parseFloat(fromAmount);
@@ -119,6 +140,25 @@ export const ExchangeDialog: React.FC<Props> = ({ open, onOpenChange }) => {
               Wszystkie środki
             </Button>
           </p>
+        </div>
+
+        {/* Swap Button */}
+        <div className="flex justify-center my-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleSwap}
+            disabled={isRotating}
+            className="swap-button"
+            style={{
+              transform: isRotating ? 'rotate(960deg)' : 'rotate(0deg)',
+              transition: isRotating ? 'transform 1s ease-in-out' : 'transform 0.3s ease-in-out'
+            }}
+          >
+            <ArrowUpDown className="h-4 w-4" />
+            <span className="ml-1">Zamień</span>
+          </Button>
         </div>
 
         {/* To Currency & Amount */}

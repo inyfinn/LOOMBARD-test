@@ -19,11 +19,14 @@ export function showConfirmToast(
     }, []);
 
     useEffect(() => {
-      const t = setTimeout(() => {
-        setShake(true);
-        setTimeout(() => setShake(false), 400);
-      }, 2000);
-      return () => clearTimeout(t);
+      const shakeAt = [13000, 9000, 5000]; // shake at 13s, 9s, 5s
+      const timers = shakeAt.map(delay => 
+        setTimeout(() => {
+          setShake(true);
+          setTimeout(() => setShake(false), 1000);
+        }, delay)
+      );
+      return () => timers.forEach(t => clearTimeout(t));
     }, []);
 
     useEffect(() => {

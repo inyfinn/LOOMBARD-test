@@ -42,8 +42,15 @@ export function RankingsSection(){
       const change = ((rate - old) / old) * 100;
       return { symbol: code, name: code, value: `${change.toFixed(2)}%`, change, category: change >= 0 ? 'gains' : 'losses' };
     });
-    const gains = items.filter(i => i.change > 0).sort((a, b) => b.change - a.change).slice(0, 5);
-    const losses = items.filter(i => i.change < 0).sort((a, b) => a.change - b.change).slice(0, 5);
+    let gains = items.filter(i => i.change > 0).sort((a, b) => b.change - a.change).slice(0, 5);
+    let losses = items.filter(i => i.change < 0).sort((a, b) => a.change - b.change).slice(0, 5);
+    // fallback: if no positive/negative changes (first load), pick top/bottom by rate
+    if (gains.length === 0) {
+      gains = [...items].sort((a,b)=> (ratesRef.current[b.symbol]-ratesRef.current[a.symbol])).slice(0,5).map(i=>({...i,change:0,value:"0.00%",category:'gains'}));
+    }
+    if (losses.length === 0) {
+      losses = [...items].sort((a,b)=> (ratesRef.current[a.symbol]-ratesRef.current[b.symbol])).slice(0,5).map(i=>({...i,change:0,value:"0.00%",category:'losses'}));
+    }
     setGroupedData({ gains, losses });
     snapshot.current = ratesRef.current;
     lastComputeTs.current = now;

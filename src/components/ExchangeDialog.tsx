@@ -53,11 +53,19 @@ export const ExchangeDialog: React.FC<Props> = ({ open, onOpenChange }) => {
     }
   }, [toAmount, fromCur, toCur, rates, lastEdited]);
 
-  const handleSubmit = () => {
-    const amt = parseFloat(fromAmount);
+  const handleSubmit = (useAll: boolean = false) => {
+    let amt = useAll ? maxBalance : parseFloat(fromAmount);
     if (isNaN(amt) || amt <= 0) return;
-    // pre-check
-    if (amt > maxBalance) { setError("Brak środków"); return; }
+    
+    // auto-adjust amount if too high
+    if (amt > maxBalance) {
+      amt = maxBalance;
+      setFromAmount(maxBalance.toString());
+      setError("Brak takich środków");
+    } else {
+      setError(null);
+    }
+
     onOpenChange(false);
     setFromAmount("");
     showConfirmToast(
@@ -105,7 +113,12 @@ export const ExchangeDialog: React.FC<Props> = ({ open, onOpenChange }) => {
               className="col-span-2"
             />
           </div>
-          <p className="text-xs text-muted-foreground">Saldo: {format(maxBalance, fromCur)}</p>
+          <p className="text-xs text-muted-foreground flex items-center justify-between">
+            Saldo: {format(maxBalance, fromCur)}
+            <Button variant="link" className="p-0 text-xs" onClick={() => handleSubmit(true)}>
+              Wszystkie środki
+            </Button>
+          </p>
         </div>
 
         {/* To Currency & Amount */}
@@ -131,7 +144,7 @@ export const ExchangeDialog: React.FC<Props> = ({ open, onOpenChange }) => {
         {error && <p className="text-red-600 text-sm mt-2">{error}</p>}
 
         <DialogFooter className="mt-4">
-          <Button onClick={handleSubmit}>Potwierdź wymianę</Button>
+          <Button onClick={() => handleSubmit(false)}>Potwierdź wymianę</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

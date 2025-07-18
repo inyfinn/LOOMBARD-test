@@ -131,7 +131,7 @@ export function RankingsTable({ category: propCategory, continent: propContinent
       defaultSort: { col: "rate", dir: "asc" },
     },
     all: {
-      label: "Wszystkie",
+      label: "Wszystko",
       filter: () => true,
     },
   };

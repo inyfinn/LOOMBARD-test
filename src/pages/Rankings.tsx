@@ -7,7 +7,6 @@ import React from "react";
 
 export default function Rankings() {
   const continents = [
-    "All",
     "Europe",
     "North America",
     "South America",
@@ -59,18 +58,23 @@ export default function Rankings() {
         </div>
 
         {/* Continent selector */}
-        <Tabs value={continent} onValueChange={setContinent} className="w-full">
-          <TabsList className="flex flex-wrap gap-1 justify-center">
-            {continents.map((c) => (
-              <TabsTrigger key={c} value={c} className="text-xs sm:text-sm">
-                {c}
+        <div className="flex items-center gap-2">
+          <Tabs value={continent} onValueChange={setContinent} className="flex-1">
+            <TabsList className="flex gap-1 overflow-x-auto scrollbar-hide">
+              <TabsTrigger value="All" className="text-xs sm:text-sm whitespace-nowrap">
+                Wszystko
               </TabsTrigger>
-            ))}
-          </TabsList>
-        </Tabs>
+              {continents.map((c) => (
+                <TabsTrigger key={c} value={c} className="text-xs sm:text-sm whitespace-nowrap">
+                  {c}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <ExpandableCard title="Wszystkie">
+          <ExpandableCard title="Wszystko">
             {(exp)=> <RankingsTable category="all" continent={continent} showCategoryTabs={false} maxRows={exp?undefined:6} />}
           </ExpandableCard>
 

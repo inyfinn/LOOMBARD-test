@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { useWallet } from "@/context/WalletContext";
-import { ArrowUpDown } from "lucide-react";
+import { RotateCcw } from "lucide-react";
 
 interface Props {
   open: boolean;
@@ -142,25 +142,6 @@ export const ExchangeDialog: React.FC<Props> = ({ open, onOpenChange }) => {
           </p>
         </div>
 
-        {/* Swap Button */}
-        <div className="flex justify-center my-2">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={handleSwap}
-            disabled={isRotating}
-            className="swap-button"
-            style={{
-              transform: isRotating ? 'rotate(960deg)' : 'rotate(0deg)',
-              transition: isRotating ? 'transform 1s ease-in-out' : 'transform 0.3s ease-in-out'
-            }}
-          >
-            <ArrowUpDown className="h-4 w-4" />
-            <span className="ml-1">Zamień</span>
-          </Button>
-        </div>
-
         {/* To Currency & Amount */}
         <div className="space-y-2 mt-4">
           <label className="text-sm font-medium">Otrzymujesz</label>
@@ -184,6 +165,20 @@ export const ExchangeDialog: React.FC<Props> = ({ open, onOpenChange }) => {
         {error && <p className="text-red-600 text-sm mt-2">{error}</p>}
 
         <DialogFooter className="mt-4">
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            onClick={handleSwap}
+            disabled={isRotating}
+            className="swap-button rounded-full w-10 h-10"
+            style={{
+              transform: isRotating ? 'rotate(360deg)' : 'rotate(0deg)',
+              transition: isRotating ? 'transform 1s ease-in-out' : 'transform 0.3s ease-in-out'
+            }}
+          >
+            <RotateCcw className="h-4 w-4" />
+          </Button>
           <Button onClick={() => handleSubmit(false)}>Potwierdź wymianę</Button>
         </DialogFooter>
       </DialogContent>

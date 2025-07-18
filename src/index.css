@@ -144,6 +144,13 @@ All colors MUST be HSL.
   .swap-button {
     @apply bg-blue-500 hover:bg-blue-600 text-white border-blue-500 hover:border-blue-600;
   }
+
+  /* Okrągły przycisk zamiany */
+  .swap-button.rounded-full {
+    @apply flex items-center justify-center;
+    min-width: 2.5rem;
+    min-height: 2.5rem;
+  }
 }
 
 @keyframes shake {

@@ -2,6 +2,8 @@
 
 Polska aplikacja do wymiany walut z interfejsem mobilnym, kursy na żywo i funkcje weryfikacji KYC.
 
+**Autor: inyfinn.art 2025**
+
 ## Funkcje
 
 - 📱 Mobile-first design z bottom navigation

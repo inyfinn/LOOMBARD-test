@@ -3,6 +3,8 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "author": "inyfinn.art 2025",
+  "description": "Testowy kalkulator walut z portfelem i rankingami",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

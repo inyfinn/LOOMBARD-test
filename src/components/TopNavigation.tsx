@@ -116,12 +116,12 @@ export function TopNavigation() {
     <header className="bg-card border-b border-border px-4 py-3">
       <div className="flex items-center justify-between max-w-7xl mx-auto">
         {/* Logo */}
-        <div className="flex items-center gap-3">
+        <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
           <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
             <span className="text-primary-foreground font-bold text-sm">L</span>
           </div>
           <h1 className="text-xl font-bold">Loombard</h1>
-        </div>
+        </Link>
 
         {/* Search - hidden on mobile */}
         <div className="hidden md:flex items-center flex-1 max-w-md mx-8">

@@ -1,6 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { TrendingUp, TrendingDown, Search, ArrowUpDown } from "lucide-react";
+import { TrendingUp, TrendingDown } from "lucide-react";
+import { useWallet } from "@/context/WalletContext";
+import { useRef, useEffect } from "react";
 
 interface RankingItem {
   symbol: string;
@@ -10,30 +12,27 @@ interface RankingItem {
   category: 'gains' | 'losses' | 'searched' | 'traded';
 }
 
-const rankingData: RankingItem[] = [
-  { symbol: "TRY", name: "Lira turecka", value: "+15.23%", change: 15.23, category: 'gains' },
-  { symbol: "ARS", name: "Peso argentyńskie", value: "+12.45%", change: 12.45, category: 'gains' },
-  { symbol: "RUB", name: "Rubel rosyjski", value: "-8.76%", change: -8.76, category: 'losses' },
-  { symbol: "GBP", name: "Funt brytyjski", value: "-5.43%", change: -5.43, category: 'losses' },
-  { symbol: "USD", name: "Dolar amerykański", value: "Wyszukiwania: 48k", change: 0, category: 'searched' },
-  { symbol: "EUR", name: "Euro", value: "Wyszukiwania: 35k", change: 0, category: 'searched' },
-  { symbol: "CHF", name: "Frank szwajcarski", value: "Wolumen: 85k", change: 0, category: 'traded' },
-  { symbol: "JPY", name: "Jen japoński", value: "Wolumen: 62k", change: 0, category: 'traded' },
-];
-
 const categoryConfig = {
   gains: { title: "Największe zyski", icon: TrendingUp, color: "text-green-500" },
   losses: { title: "Największe straty", icon: TrendingDown, color: "text-red-500" },
-  searched: { title: "Najczęściej wyszukiwane", icon: Search, color: "text-blue-500" },
-  traded: { title: "Najwyższy wolumen", icon: ArrowUpDown, color: "text-purple-500" },
 };
 
-export function RankingsSection() {
-  const groupedData = rankingData.reduce((acc, item) => {
-    if (!acc[item.category]) acc[item.category] = [];
-    acc[item.category].push(item);
-    return acc;
-  }, {} as Record<string, RankingItem[]>);
+export function RankingsSection(){
+  const { rates } = useWallet();
+  const prev = useRef<Record<string, number>>(rates);
+
+  useEffect(()=>{ prev.current = rates; },[rates]);
+
+  const items:RankingItem[] = Object.entries(rates).map(([code,rate])=>{
+    const old = prev.current[code]??rate;
+    const change = ((rate-old)/old)*100;
+    return {symbol:code,name:code,value:`${change.toFixed(2)}%`,change,category: change>=0?'gains':'losses'};
+  });
+
+  const topGains = items.filter(i=>i.change>0).sort((a,b)=>b.change-a.change).slice(0,5);
+  const topLoss = items.filter(i=>i.change<0).sort((a,b)=>a.change-b.change).slice(0,5);
+
+  const groupedData:{[k:string]:RankingItem[]}={gains:topGains,losses:topLoss};
 
   const renderRankingCard = (category: keyof typeof categoryConfig, items: RankingItem[]) => {
     const config = categoryConfig[category];

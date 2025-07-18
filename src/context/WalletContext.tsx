@@ -32,6 +32,20 @@ const initialRates: Record<string, number> = {
   CZK: 0.1756,
 };
 
+// Dodaj losowe waluty do liczby 100
+(() => {
+  const symbols = Object.keys(initialRates);
+  let idx = 1;
+  while (symbols.length < 100) {
+    const code = `CC${idx}`; // fikcyjny kod
+    if (!initialRates[code]) {
+      initialRates[code] = parseFloat((Math.random() * 5 + 0.1).toFixed(4));
+      symbols.push(code);
+    }
+    idx++;
+  }
+})();
+
 const WalletContext = createContext<WalletContextValue | undefined>(undefined);
 
 export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {

@@ -53,7 +53,7 @@ export function RankingsSection(){
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-2">
-          {items.slice(0, 2).map((item, index) => (
+          {items.map((item, index) => (
             <div key={item.symbol} className="flex items-center justify-between py-2">
               <div className="flex items-center gap-2">
                 <span className="w-6 h-6 rounded-full bg-muted flex items-center justify-center text-xs font-bold">

@@ -70,12 +70,12 @@ export function PortfolioSection() {
                 <ArrowUpDown size={16} className="mr-1" />
                 Wymień
               </Button>
-            <Button variant="ghost" className="border border-primary text-primary hover:bg-white hover:text-primary dark:hover:bg-primary/10" onClick={()=> setWithdrawOpen(true)}>
+            <Button className="bg-white text-primary hover:bg-primary/10 dark:bg-transparent dark:border dark:border-primary dark:text-primary" onClick={()=> setWithdrawOpen(true)}>
               <PiggyBank size={16} className="mr-1" />
               Wypłać
               </Button>
 
-             <Button variant="ghost" className="border border-primary text-primary hover:bg-white hover:text-primary dark:hover:bg-primary/10" onClick={()=> setDepositOpen(true)}>
+             <Button className="bg-white text-primary hover:bg-primary/10 dark:bg-transparent dark:border dark:border-primary dark:text-primary" onClick={()=> setDepositOpen(true)}>
                 <WalletIn size={16} className="mr-1" />
                 Wpłać
               </Button>

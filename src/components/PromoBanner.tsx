@@ -1,22 +1,26 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { useNavigate } from "react-router-dom";
 import { useWallet } from "@/context/WalletContext";
 import { Badge } from "@/components/ui/badge";
 import { Sparkles, TrendingUp } from "lucide-react";
+import { useState } from "react";
 
 export function PromoBanner() {
   const navigate = useNavigate();
   const { deposit, balances } = useWallet();
+  const [dialogOpen,setDialogOpen]=useState(false);
 
   const handleStart=()=>{
     const pln = balances["PLN"]||0;
     const gain = pln*0.045;
     deposit("PLN",parseFloat(gain.toFixed(2)));
-    alert("Zyskałeś 4,5% rocznie!");
+    setDialogOpen(true);
   };
 
   return (
+    <>
     <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white relative overflow-hidden">
       <CardContent className="p-4">
         
@@ -57,5 +61,20 @@ export function PromoBanner() {
         <div className="absolute -bottom-4 -left-4 w-16 h-16 bg-white/5 rounded-full"></div>
       </CardContent>
     </Card>
+
+    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Środki dodane!</DialogTitle>
+        </DialogHeader>
+        <p className="text-sm">Właśnie zyskałeś 4,5&nbsp;% do salda rocznie.&nbsp;Dziękujemy za skorzystanie z lokaty&nbsp;Premium.</p>
+        <DialogFooter>
+          <DialogClose asChild>
+            <Button>Dzięki</Button>
+          </DialogClose>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+    </>
   );
 }

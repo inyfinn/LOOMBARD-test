@@ -54,7 +54,7 @@ export function PortfolioSection() {
   return (
     <div className="space-y-6">
       {/* Main Balance Display */}
-      <Card className="bg-primary text-white dark:bg-card dark:text-primary border border-primary">
+      <Card className="bg-[#02c349] text-white dark:bg-card dark:text-primary border border-primary">
         <CardContent className="p-6">
           <p className="text-sm mb-1 text-white dark:text-white">Całkowite saldo</p>
           <h2 className="text-4xl font-bold text-white">
@@ -70,12 +70,12 @@ export function PortfolioSection() {
                 <ArrowUpDown size={16} className="mr-1" />
                 Wymień
               </Button>
-            <Button className="bg-white text-primary hover:bg-primary/10 dark:bg-transparent dark:border dark:border-primary dark:text-primary" onClick={()=> setWithdrawOpen(true)}>
+            <Button className="border border-white text-white bg-transparent hover:bg-white/10 dark:bg-transparent dark:border dark:border-primary dark:text-primary" onClick={()=> setWithdrawOpen(true)}>
               <PiggyBank size={16} className="mr-1" />
               Wypłać
               </Button>
 
-             <Button className="bg-white text-primary hover:bg-primary/10 dark:bg-transparent dark:border dark:border-primary dark:text-primary" onClick={()=> setDepositOpen(true)}>
+             <Button className="border border-white text-white bg-transparent hover:bg-white/10 dark:bg-transparent dark:border dark:border-primary dark:text-primary" onClick={()=> setDepositOpen(true)}>
                 <WalletIn size={16} className="mr-1" />
                 Wpłać
               </Button>

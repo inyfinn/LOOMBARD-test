@@ -34,7 +34,8 @@ export function RankingsSection(){
       setGroupedData({gains,losses});
       snapshot.current = rates;
     };
-    calc(); // initial
+    // pierwsze wyliczenie po 0.5 s aby mieć różnicę od startu
+    const first=setTimeout(calc,500);
     const id=setInterval(calc,86400000);
     return ()=>clearInterval(id);
   },[]);

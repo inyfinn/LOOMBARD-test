@@ -9,6 +9,7 @@ interface WalletContextValue {
   balances: Record<string, number>;
   rates: Record<string, number>;
   transactions: Transaction[];
+  lastUpdate: number;
   deposit: (currency: string, amount: number) => void;
   withdraw: (currency: string, amount: number) => { success: boolean; error?: string };
   exchange: (from: string, to: string, amount: number) => { success: boolean; error?: string };
@@ -39,6 +40,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   });
 
   const [ratesData, setRates] = useState<Record<string, number>>(initialRates);
+  const [lastUpdate, setLastUpdate] = useState<number>(Date.now());
 
   const sampleTx: Transaction[] = Array.from({length:15}).map((_,i)=>({type:"deposit",currency:"PLN",amount:50*i+10,timestamp:Date.now()-i*3600*1000}));
 
@@ -51,12 +53,14 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       setRates((r) => {
         const next: Record<string, number> = { ...r };
         Object.keys(next).forEach((k) => {
-          const drift = 1 + (Math.random() - 0.5) * 0.01; // ±0.5%
+          const delta = Math.random() * 0.0009 + 0.0001; // 0.01%–0.1%
+          const drift = 1 + (Math.random() < 0.5 ? -delta : delta);
           next[k] = parseFloat((next[k] * drift).toFixed(4));
         });
         next["PLN"] = 1;
         return next;
       });
+      setLastUpdate(Date.now());
     }, 500);
     return () => clearInterval(id);
   }, []);
@@ -109,7 +113,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   return (
     <WalletContext.Provider
-      value={{ balances, rates: ratesData, transactions, deposit, withdraw, exchange }}>
+      value={{ balances, rates: ratesData, transactions, lastUpdate, deposit, withdraw, exchange }}>
       {children}
     </WalletContext.Provider>
   );

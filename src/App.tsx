@@ -11,6 +11,7 @@ import NotFound from "./pages/NotFound";
 import { BottomNav } from "./components/BottomNav";
 import { WalletProvider } from "@/context/WalletContext";
 import TransactionsPage from "./pages/Transactions";
+import { UpdateInfo } from "@/components/UpdateInfo";
 
 const queryClient = new QueryClient();
 
@@ -31,6 +32,7 @@ const App = () => (
               <Route path="*" element={<NotFound />} />
             </Routes>
             <BottomNav />
+            <UpdateInfo />
           </div>
         </BrowserRouter>
       </WalletProvider>

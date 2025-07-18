@@ -4,32 +4,25 @@ import { Input } from "@/components/ui/input";
 import { useState, useEffect } from "react";
 
 export function TopNavigation() {
-  const [theme, setTheme] = useState<'light' | 'dark' | 'system'>('system');
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [layout, setLayout] = useState<'mobile' | 'desktop'>('mobile');
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | 'system' || 'system';
+    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' || 'light';
     const savedLayout = localStorage.getItem('layout') as 'mobile' | 'desktop' || 'mobile';
     setTheme(savedTheme);
     setLayout(savedLayout);
   }, []);
 
   const toggleTheme = () => {
-    const newTheme = theme === 'light' ? 'dark' : theme === 'dark' ? 'system' : 'light';
+    const newTheme = theme === 'light' ? 'dark' : 'light';
     setTheme(newTheme);
     localStorage.setItem('theme', newTheme);
     
     if (newTheme === 'dark') {
       document.documentElement.classList.add('dark');
-    } else if (newTheme === 'light') {
-      document.documentElement.classList.remove('dark');
     } else {
-      // system
-      if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-      }
+      document.documentElement.classList.remove('dark');
     }
   };
 
@@ -41,9 +34,7 @@ export function TopNavigation() {
   };
 
   const getThemeIcon = () => {
-    if (theme === 'light') return <Sun size={18} />;
-    if (theme === 'dark') return <Moon size={18} />;
-    return <Monitor size={18} />;
+    return theme === 'light' ? <Moon size={18}/> : <Sun size={18}/>;
   };
 
   return (
@@ -70,7 +61,7 @@ export function TopNavigation() {
 
         {/* Actions */}
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" onClick={toggleTheme}>
+          <Button variant="ghost" size="sm" onClick={toggleTheme} aria-label={theme==='light'?'Tryb ciemny':'Tryb jasny'}>
             {getThemeIcon()}
           </Button>
           

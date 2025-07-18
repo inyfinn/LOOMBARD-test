@@ -57,7 +57,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         next["PLN"] = 1;
         return next;
       });
-    }, 1000);
+    }, 500);
     return () => clearInterval(id);
   }, []);
 
